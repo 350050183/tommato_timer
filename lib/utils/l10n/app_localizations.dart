@@ -122,6 +122,18 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['breakCompleted'] ??
       en['breakCompleted']!;
 
+  String get workSessionCompleted =>
+      _localizedValues[locale.languageCode]?['workSessionCompleted'] ??
+      en['workSessionCompleted']!;
+
+  String get shortBreakCompleted =>
+      _localizedValues[locale.languageCode]?['shortBreakCompleted'] ??
+      en['shortBreakCompleted']!;
+
+  String get longBreakCompleted =>
+      _localizedValues[locale.languageCode]?['longBreakCompleted'] ??
+      en['longBreakCompleted']!;
+
   String get cancel =>
       _localizedValues[locale.languageCode]?['cancel'] ?? en['cancel']!;
   String get save =>

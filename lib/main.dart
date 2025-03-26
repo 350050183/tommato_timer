@@ -32,27 +32,30 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => TimerModel(settings: settings)),
         ChangeNotifierProvider(
           create: (_) => SettingsModel(settings: settings),
         ),
+        ChangeNotifierProvider(create: (_) => TimerModel(settings: settings)),
       ],
       child: Consumer<SettingsModel>(
-        builder: (context, settingsModel, _) {
+        builder: (context, settingsModel, child) {
           return MaterialApp(
-            title: 'Tomato Time',
-            locale: settingsModel.locale,
+            title: '番茄计时器',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode:
+                settingsModel.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('en', ''), Locale('zh', '')],
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode:
-                settingsModel.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            supportedLocales: const [Locale('en'), Locale('zh')],
+            locale:
+                settingsModel.settings.locale == 'auto'
+                    ? null
+                    : Locale(settingsModel.settings.locale),
             home: const SplashScreen(),
           );
         },

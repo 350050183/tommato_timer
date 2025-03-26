@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../utils/l10n/app_localizations.dart';
 import 'timer_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -56,26 +57,27 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Center(
-            child: Opacity(
-              opacity: _opacityAnimation.value,
-              child: Transform.scale(
-                scale: _scaleAnimation.value,
+      body: Center(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Opacity(
+                opacity: _opacityAnimation.value,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // 番茄时钟图标
+                    // 番茄时钟 App Logo
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: 180,
+                      height: 180,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const RadialGradient(
@@ -163,8 +165,8 @@ class _SplashScreenState extends State<SplashScreen>
                           // 中间白色圆圈
                           Center(
                             child: Container(
-                              width: 80,
-                              height: 80,
+                              width: 120,
+                              height: 120,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.white.withOpacity(0.15),
@@ -176,11 +178,11 @@ class _SplashScreenState extends State<SplashScreen>
                             child: Transform.rotate(
                               angle: 0.8,
                               child: Container(
-                                width: 4,
-                                height: 35,
+                                width: 5,
+                                height: 50,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(2),
+                                  borderRadius: BorderRadius.circular(3),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.2),
@@ -195,8 +197,8 @@ class _SplashScreenState extends State<SplashScreen>
                           // 中央圆点
                           Center(
                             child: Container(
-                              width: 8,
-                              height: 8,
+                              width: 12,
+                              height: 12,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.white,
@@ -207,30 +209,26 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // 应用名称
-                    Text(
-                      '番茄计时器',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // 版本号
-                    Text(
-                      '版本 1.0.0',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.av_timer, color: Colors.red, size: 28),
+                        const SizedBox(width: 8),
+                        Text(
+                          localizations.appTitle,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

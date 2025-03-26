@@ -39,8 +39,9 @@ const Map<String, String> en = {
   'sessions': 'sessions',
   'actualDuration': 'Actual Duration',
 
-  'sessionCompleted': 'Session Completed!',
-  'breakCompleted': 'Break Completed!',
+  'workSessionCompleted': 'Work Session Completed!',
+  'shortBreakCompleted': 'Short Break Completed!',
+  'longBreakCompleted': 'Long Break Completed!',
 
   'cancel': 'Cancel',
   'save': 'Save',

@@ -1,11 +1,28 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/l10n/app_localizations.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
+
+  Future<void> _launchEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'swingcoder@gmail.com',
+      queryParameters: {'subject': '关于番茄计时器 App'},
+    );
+
+    try {
+      if (!await launchUrl(emailLaunchUri)) {
+        throw Exception('无法打开邮件客户端');
+      }
+    } catch (e) {
+      debugPrint('发送邮件失败: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,35 +224,29 @@ class AboutScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '使用提示',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.person_outline),
+                      title: const Text('开发者'),
+                      subtitle: GestureDetector(
+                        onTap: _launchEmail,
+                        child: const Text(
+                          'swingcoder@gmail.com',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        '• 设定一个明确的任务目标\n'
-                        '• 专注工作，避免干扰\n'
-                        '• 休息时间真正休息，远离工作\n'
-                        '• 坚持使用几周来养成习惯\n'
-                        '• 根据个人情况调整时间设置',
-                        style: TextStyle(height: 1.5),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
             ],
           ),
         ),

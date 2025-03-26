@@ -39,8 +39,9 @@ const Map<String, String> zh = {
   'sessions': '阶段',
   'actualDuration': '实际时长',
 
-  'sessionCompleted': '工作阶段已完成！',
-  'breakCompleted': '休息时间已结束！',
+  'workSessionCompleted': '工作阶段已完成！',
+  'shortBreakCompleted': '短休息已结束！',
+  'longBreakCompleted': '长休息已结束！',
 
   'cancel': '取消',
   'save': '保存',

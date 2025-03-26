@@ -40,8 +40,11 @@ class _TimerScreenState extends State<TimerScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final message =
             timerModel.currentType == TimerType.work
-                ? localizations.sessionCompleted
-                : localizations.breakCompleted;
+                ? (timerModel.currentSession >=
+                        timerModel.sessionsBeforeLongBreak
+                    ? localizations.longBreakCompleted
+                    : localizations.shortBreakCompleted)
+                : localizations.workSessionCompleted;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
