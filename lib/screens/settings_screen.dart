@@ -1,84 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../models/settings.dart';
 import '../models/timer_model.dart';
 import '../utils/l10n/app_localizations.dart';
-import '../widgets/glassmorphic_container.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
-  Future<void> _sendFeedback(BuildContext context) async {
-    final localizations = AppLocalizations.of(context);
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: 'swingcoder@gmail.com',
-      queryParameters: {'subject': localizations.feedbackEmailSubject},
-    );
-
-    try {
-      if (!await launchUrl(emailLaunchUri)) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: GlassmorphicContainer(
-                width: double.infinity,
-                height: 60,
-                borderRadius: 12,
-                blur: 10,
-                border: 1,
-                linearGradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? [
-                            Colors.black.withOpacity(0.3),
-                            Colors.black.withOpacity(0.4),
-                          ]
-                          : [
-                            Colors.white.withOpacity(0.8),
-                            Colors.white.withOpacity(0.9),
-                          ],
-                ),
-                borderColor:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.2)
-                        : Colors.white.withOpacity(0.6),
-                shadowColor: Colors.transparent,
-                child: Center(
-                  child: Text(
-                    localizations.feedbackEmailError,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black87,
-                    ),
-                  ),
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              duration: const Duration(seconds: 3),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              elevation: 0,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(localizations.feedbackEmailError)),
-        );
-      }
-    }
-  }
 
   void updateSettingAndTimer(
     BuildContext context,
