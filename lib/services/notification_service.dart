@@ -1,6 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../models/timer_model.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
