@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/settings.dart';
 import '../models/timer_model.dart';
 import '../utils/l10n/app_localizations.dart';
+import 'about_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -169,6 +170,29 @@ class SettingsScreen extends StatelessWidget {
                         }
                       },
                     ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 关于
+            _buildSectionHeader(context, localizations.appInfo),
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: Text(localizations.aboutButton),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AboutScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

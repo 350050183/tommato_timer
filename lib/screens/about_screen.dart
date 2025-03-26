@@ -1,83 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/l10n/app_localizations.dart';
-import '../widgets/glassmorphic_container.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
-
-  Future<void> _contactDeveloper(BuildContext context) async {
-    final localizations = AppLocalizations.of(context);
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: 'swingcoder@gmail.com',
-      queryParameters: {'subject': localizations.contactDeveloper},
-    );
-
-    try {
-      if (!await launchUrl(emailLaunchUri)) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: GlassmorphicContainer(
-                width: double.infinity,
-                height: 60,
-                borderRadius: 12,
-                blur: 10,
-                border: 1,
-                linearGradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? [
-                            Colors.black.withOpacity(0.3),
-                            Colors.black.withOpacity(0.4),
-                          ]
-                          : [
-                            Colors.white.withOpacity(0.8),
-                            Colors.white.withOpacity(0.9),
-                          ],
-                ),
-                borderColor:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.2)
-                        : Colors.white.withOpacity(0.6),
-                shadowColor: Colors.transparent,
-                child: Center(
-                  child: Text(
-                    localizations.feedbackEmailError,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black87,
-                    ),
-                  ),
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              duration: const Duration(seconds: 3),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              elevation: 0,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(localizations.feedbackEmailError)),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,7 +208,6 @@ class AboutScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // 开发者信息卡片
               Card(
                 elevation: 2,
                 child: Padding(
@@ -289,19 +216,20 @@ class AboutScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        localizations.developer,
+                        '使用提示',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      ListTile(
-                        leading: const Icon(Icons.email_outlined),
-                        title: Text(localizations.developerEmail),
-                        subtitle: const Text('swingcoder@gmail.com'),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => _contactDeveloper(context),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '• 设定一个明确的任务目标\n'
+                        '• 专注工作，避免干扰\n'
+                        '• 休息时间真正休息，远离工作\n'
+                        '• 坚持使用几周来养成习惯\n'
+                        '• 根据个人情况调整时间设置',
+                        style: TextStyle(height: 1.5),
                       ),
                     ],
                   ),
@@ -316,23 +244,30 @@ class AboutScreen extends StatelessWidget {
   }
 }
 
-// 番茄纹理绘制
 class TomatoTexturePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
     final paint =
         Paint()
           ..color = Colors.white.withOpacity(0.1)
-          ..style = PaintingStyle.fill;
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
 
-    // 绘制一些随机的圆点作为番茄纹理
-    for (int i = 0; i < 30; i++) {
-      final angle = i * 0.2;
-      final x = center.dx + radius * 0.7 * math.cos(angle);
-      final y = center.dy + radius * 0.7 * math.sin(angle);
-      canvas.drawCircle(Offset(x, y), 3 + (i % 3), paint);
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+
+    // 绘制纹理线条
+    for (var i = 0; i < 12; i++) {
+      final angle = (i * math.pi / 6);
+      final startPoint = Offset(
+        center.dx + radius * 0.7 * math.cos(angle),
+        center.dy + radius * 0.7 * math.sin(angle),
+      );
+      final endPoint = Offset(
+        center.dx + radius * 0.9 * math.cos(angle),
+        center.dy + radius * 0.9 * math.sin(angle),
+      );
+      canvas.drawLine(startPoint, endPoint, paint);
     }
   }
 
@@ -340,44 +275,30 @@ class TomatoTexturePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// 计时器刻度绘制
 class TimerMarksPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
     final paint =
         Paint()
-          ..color = Colors.white
+          ..color = Colors.white.withOpacity(0.2)
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2;
+          ..strokeWidth = 1;
 
-    // 外圆
-    canvas.drawCircle(center, radius - 8, paint);
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
 
-    // 刻度
-    paint.strokeWidth = 1.5;
-    for (int i = 0; i < 12; i++) {
-      final angle = i * math.pi / 6;
-      final startX = center.dx + (radius - 12) * math.cos(angle);
-      final startY = center.dy + (radius - 12) * math.sin(angle);
-      final endX = center.dx + (radius - 8) * math.cos(angle);
-      final endY = center.dy + (radius - 8) * math.sin(angle);
-      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
-    }
-
-    // 小刻度
-    paint.strokeWidth = 1;
-    for (int i = 0; i < 60; i++) {
-      // 跳过已经画过的主刻度
-      if (i % 5 == 0) continue;
-
-      final angle = i * math.pi / 30;
-      final startX = center.dx + (radius - 10) * math.cos(angle);
-      final startY = center.dy + (radius - 10) * math.sin(angle);
-      final endX = center.dx + (radius - 8) * math.cos(angle);
-      final endY = center.dy + (radius - 8) * math.sin(angle);
-      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
+    // 绘制刻度
+    for (var i = 0; i < 60; i++) {
+      final angle = (i * math.pi / 30);
+      final startPoint = Offset(
+        center.dx + radius * 0.85 * math.cos(angle),
+        center.dy + radius * 0.85 * math.sin(angle),
+      );
+      final endPoint = Offset(
+        center.dx + radius * 0.95 * math.cos(angle),
+        center.dy + radius * 0.95 * math.sin(angle),
+      );
+      canvas.drawLine(startPoint, endPoint, paint);
     }
   }
 

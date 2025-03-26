@@ -97,7 +97,7 @@ class ControlButtons extends StatelessWidget {
           const SizedBox(height: 16),
           _glassmorphicButton(
             context: context,
-            width: 240,
+            width: 270,
             onPressed: timerModel.skipToNext,
             linearGradient: LinearGradient(
               begin: Alignment.topLeft,
