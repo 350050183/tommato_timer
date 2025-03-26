@@ -49,4 +49,21 @@ const Map<String, String> zh = {
   'systemDefault': '系统默认',
   'english': '英文',
   'chinese': '中文',
+
+  // 关于页面
+  'appVersion': '应用版本',
+  'appDescription': '番茄计时器是一个简单而优雅的番茄工作法应用，帮助你提高工作效率。',
+  'developerInfo': '开发者信息',
+  'developerName': '吴坤',
+  'developerEmail': 'swingcoder@gmail.com',
+  'contactDeveloper': '联系开发者',
+  'appFeatures': '应用特点',
+  'feature1': '• 简洁优雅的用户界面',
+  'feature2': '• 支持工作、短休息和长休息计时',
+  'feature3': '• 自定义计时时长',
+  'feature4': '• 支持通知提醒',
+  'feature5': '• 支持深色模式',
+  'feature6': '• 支持中英文切换',
+  'feature7': '• 支持振动反馈',
+  'feature8': '• 支持保持屏幕常亮',
 };

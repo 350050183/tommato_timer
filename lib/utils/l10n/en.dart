@@ -49,4 +49,22 @@ const Map<String, String> en = {
   'systemDefault': 'System Default',
   'english': 'English',
   'chinese': 'Chinese',
+
+  // About page
+  'appVersion': 'App Version',
+  'appDescription':
+      'Tomato Timer is a simple and elegant Pomodoro timer app that helps you improve your work efficiency.',
+  'developerInfo': 'Developer Information',
+  'developerName': 'Wu Kun',
+  'developerEmail': 'swingcoder@gmail.com',
+  'contactDeveloper': 'Contact Developer',
+  'appFeatures': 'App Features',
+  'feature1': '• Clean and elegant user interface',
+  'feature2': '• Support for work, short break, and long break timers',
+  'feature3': '• Customizable timer durations',
+  'feature4': '• Notification support',
+  'feature5': '• Dark mode support',
+  'feature6': '• English and Chinese language support',
+  'feature7': '• Vibration feedback',
+  'feature8': '• Keep screen on option',
 };

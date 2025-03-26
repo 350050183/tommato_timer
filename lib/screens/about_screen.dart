@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/l10n/app_localizations.dart';
@@ -174,79 +175,135 @@ class AboutScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.av_timer, color: Colors.red, size: 28),
-                  const SizedBox(width: 8),
-                  Text(
-                    localizations.appTitle,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              // 应用名称和版本
+              Text(
+                localizations.appTitle,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
-              const Text('版本 1.0.0', style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 16),
+              FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      '${localizations.appVersion}: ${snapshot.data!.version}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white70 : Colors.black54,
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              const SizedBox(height: 24),
+              // 应用描述
               Text(
-                '一个简单的番茄工作法时间管理应用。',
+                localizations.appDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // 开发者信息
+              Text(
+                localizations.developerInfo,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
-              const Card(
-                elevation: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '番茄工作法是什么？',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        '番茄工作法是一种时间管理方法，它使用一个定时器来分割工作，传统上是25分钟的工作时间，然后是5分钟的休息时间。'
-                        '这些间隔被称为"番茄"，每完成四个番茄后，会有一个较长的休息时间（通常为15-30分钟）。',
-                        style: TextStyle(height: 1.5),
-                      ),
-                    ],
+              Text(
+                localizations.developerName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: _launchEmail,
+                child: Text(
+                  localizations.developerEmail,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                    decoration: TextDecoration.underline,
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-              Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.person_outline),
-                      title: const Text('开发者'),
-                      subtitle: GestureDetector(
-                        onTap: _launchEmail,
-                        child: const Text(
-                          'swingcoder@gmail.com',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 32),
+              // 应用特点
+              Text(
+                localizations.appFeatures,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
+              Text(
+                localizations.feature1,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              Text(
+                localizations.feature2,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              Text(
+                localizations.feature3,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              Text(
+                localizations.feature4,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              Text(
+                localizations.feature5,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              Text(
+                localizations.feature6,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              Text(
+                localizations.feature7,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              Text(
+                localizations.feature8,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
             ],
           ),
         ),

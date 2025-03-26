@@ -146,6 +146,44 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['english'] ?? en['english']!;
   String get chinese =>
       _localizedValues[locale.languageCode]?['chinese'] ?? en['chinese']!;
+
+  // About page
+  String get appVersion =>
+      _localizedValues[locale.languageCode]?['appVersion'] ?? en['appVersion']!;
+  String get appDescription =>
+      _localizedValues[locale.languageCode]?['appDescription'] ??
+      en['appDescription']!;
+  String get developerInfo =>
+      _localizedValues[locale.languageCode]?['developerInfo'] ??
+      en['developerInfo']!;
+  String get developerName =>
+      _localizedValues[locale.languageCode]?['developerName'] ??
+      en['developerName']!;
+  String get developerEmail =>
+      _localizedValues[locale.languageCode]?['developerEmail'] ??
+      en['developerEmail']!;
+  String get contactDeveloper =>
+      _localizedValues[locale.languageCode]?['contactDeveloper'] ??
+      en['contactDeveloper']!;
+  String get appFeatures =>
+      _localizedValues[locale.languageCode]?['appFeatures'] ??
+      en['appFeatures']!;
+  String get feature1 =>
+      _localizedValues[locale.languageCode]?['feature1'] ?? en['feature1']!;
+  String get feature2 =>
+      _localizedValues[locale.languageCode]?['feature2'] ?? en['feature2']!;
+  String get feature3 =>
+      _localizedValues[locale.languageCode]?['feature3'] ?? en['feature3']!;
+  String get feature4 =>
+      _localizedValues[locale.languageCode]?['feature4'] ?? en['feature4']!;
+  String get feature5 =>
+      _localizedValues[locale.languageCode]?['feature5'] ?? en['feature5']!;
+  String get feature6 =>
+      _localizedValues[locale.languageCode]?['feature6'] ?? en['feature6']!;
+  String get feature7 =>
+      _localizedValues[locale.languageCode]?['feature7'] ?? en['feature7']!;
+  String get feature8 =>
+      _localizedValues[locale.languageCode]?['feature8'] ?? en['feature8']!;
 }
 
 class _AppLocalizationsDelegate
