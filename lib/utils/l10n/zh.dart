@@ -54,7 +54,7 @@ const Map<String, String> zh = {
   'appVersion': '应用版本',
   'appDescription': '番茄计时器是一个简单而优雅的番茄工作法应用，帮助你提高工作效率。',
   'developerInfo': '开发者信息',
-  'developerName': '吴坤',
+  'developerName': 'swingcoder',
   'developerEmail': 'swingcoder@gmail.com',
   'contactDeveloper': '联系开发者',
   'appFeatures': '应用特点',

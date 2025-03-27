@@ -1,8 +1,11 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '12.0'
+platform :ios, '12.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+# 抑制未使用的主 specs 仓库警告
+install! 'cocoapods', :warn_for_unused_master_specs_repo => false
 
 project 'Runner', {
   'Debug' => :debug,
@@ -29,6 +32,19 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
+  use_modular_headers!
+
+  # 明确排除 device_info_plus 插件
+  pod 'device_info_plus', :path => '.symlinks/plugins/device_info_plus/ios', :inhibit_warnings => true do |device_info|
+    device_info.exclude_files = '**/*'
+    device_info.source_files = ''
+  end
+
+  # 明确排除 package_info_plus 插件
+  # pod 'package_info_plus', :path => '.symlinks/plugins/package_info_plus/ios', :inhibit_warnings => true do |package_info|
+  #   package_info.exclude_files = '**/*'
+  #   package_info.source_files = ''
+  # end
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
@@ -39,5 +55,54 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
+    # 跳过 device_info_plus 和 package_info_plus 目标
+    next if ['device_info_plus', 'package_info_plus'].include?(target.name)
+    
+    target.build_configurations.each do |config|
+      # 为常规目标添加通用隐私清单
+      privacy_plist_path = File.join(File.dirname(File.realpath(__FILE__)), 'Runner', 'PrivacyInfo.xcprivacy')
+      
+      if File.exist?(privacy_plist_path)
+        config.build_settings['PRIVACY_MANIFEST_PATH'] = privacy_plist_path
+        config.build_settings['GENERATE_PRIVACY_MANIFEST'] = 'YES'
+      end
+
+      # 添加通用编译设置
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'PRIVACY_MANIFEST=1',
+      ]
+    end
+  end
+
+  # 为所有目标创建构建后脚本，确保复制隐私清单
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.user_project.targets.each do |target|
+      target.build_phases.each do |build_phase|
+        if build_phase.respond_to?(:name) && build_phase.name == 'Copy Bundle Resources'
+          # 确保隐私清单文件包含在资源中
+          privacy_files = ['PrivacyInfo.xcprivacy']
+          
+          privacy_files.each do |privacy_file|
+            full_path = File.join(File.dirname(File.realpath(__FILE__)), 'Runner', privacy_file)
+            if File.exist?(full_path)
+              # 检查这个文件是否已经在构建阶段中
+              file_ref_found = target.resources_build_phase.files.any? do |file|
+                file.file_ref.path == privacy_file
+              end
+              
+              unless file_ref_found
+                puts "Adding #{privacy_file} to resources build phase"
+                # 文件需要先添加到项目中
+                file_ref = target.project.new_file(full_path)
+                target.resources_build_phase.add_file_reference(file_ref)
+              end
+            end
+          end
+        end
+      end
+      target.project.save
+    end
   end
 end

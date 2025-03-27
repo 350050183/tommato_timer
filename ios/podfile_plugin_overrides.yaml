@@ -1,0 +1,4 @@
+# 排除有问题的依赖
+excluded_plugins:
+  - device_info_plus
+  - package_info_plus
