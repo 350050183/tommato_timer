@@ -4,6 +4,7 @@ import '../models/timer_model.dart';
 import '../utils/app_theme.dart';
 import '../utils/l10n/app_localizations.dart';
 import 'glassmorphic_container.dart';
+import 'tomato_3d_model.dart';
 
 class TimerDisplay extends StatelessWidget {
   final TimerModel timerModel;
@@ -16,7 +17,6 @@ class TimerDisplay extends StatelessWidget {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
-    final containerSize = size.width * 0.8 < 300 ? size.width * 0.8 : 300.0;
 
     String timerTypeText;
     Color progressColor;
@@ -50,19 +50,21 @@ class TimerDisplay extends StatelessWidget {
             linearGradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: isDarkMode
-                  ? [
-                      AppTheme.darkGlassColor.withOpacity(0.1),
-                      AppTheme.darkGlassColor.withOpacity(0.2),
-                    ]
-                  : [
-                      AppTheme.lightGlassColor.withOpacity(0.6),
-                      AppTheme.lightGlassColor.withOpacity(0.7),
-                    ],
+              colors:
+                  isDarkMode
+                      ? [
+                        AppTheme.darkGlassColor.withOpacity(0.1),
+                        AppTheme.darkGlassColor.withOpacity(0.2),
+                      ]
+                      : [
+                        AppTheme.lightGlassColor.withOpacity(0.6),
+                        AppTheme.lightGlassColor.withOpacity(0.7),
+                      ],
             ),
-            borderColor: isDarkMode
-                ? Colors.white.withOpacity(0.1)
-                : Colors.white.withOpacity(0.5),
+            borderColor:
+                isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.white.withOpacity(0.5),
             shadowColor: Colors.transparent,
             child: Center(
               child: Text(
@@ -75,115 +77,33 @@ class TimerDisplay extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 30),
-          // 计时器主体
-          GlassmorphicContainer(
-            width: containerSize,
-            height: containerSize,
-            shape: BoxShape.circle,
-            blur: 10,
-            border: 1.5,
-            linearGradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDarkMode
-                  ? [
-                      AppTheme.darkGlassColor.withOpacity(0.1),
-                      AppTheme.darkGlassColor.withOpacity(0.2),
-                    ]
-                  : [
-                      AppTheme.lightGlassColor.withOpacity(0.6),
-                      AppTheme.lightGlassColor.withOpacity(0.7),
-                    ],
-            ),
-            borderColor: isDarkMode
-                ? Colors.white.withOpacity(0.1)
-                : Colors.white.withOpacity(0.5),
-            shadowColor: isDarkMode 
-                ? Colors.black.withOpacity(0.1) 
-                : Colors.black.withOpacity(0.2),
-            shadowBlur: 15,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // 进度指示器
-                SizedBox(
-                  width: containerSize * 0.9,
-                  height: containerSize * 0.9,
-                  child: CircularProgressIndicator(
-                    value: timerModel.progress,
-                    strokeWidth: 12,
-                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                    backgroundColor: isDarkMode 
-                        ? Colors.white.withOpacity(0.1) 
-                        : Colors.grey.shade200,
-                  ),
-                ),
-                // 时间文本
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _formatDuration(timerModel.remainingTime),
-                      style: TextStyle(
-                        fontSize: containerSize * 0.2,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: progressColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${timerModel.currentSession}/${timerModel.sessionsBeforeLongBreak}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: progressColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          const SizedBox(height: 20),
+          // 3D 模型
+          Tomato3DModel(progress: timerModel.progress, isDarkMode: isDarkMode),
+          const SizedBox(height: 20),
+          // 时间文本
+          Text(
+            _formatDuration(timerModel.remainingTime),
+            style: TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black87,
             ),
           ),
           const SizedBox(height: 20),
           // 会话计数器
-          GlassmorphicContainer(
-            width: 200,
-            height: 40,
-            borderRadius: 20,
-            blur: 10,
-            border: 1,
-            linearGradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDarkMode
-                  ? [
-                      AppTheme.darkGlassColor.withOpacity(0.1),
-                      AppTheme.darkGlassColor.withOpacity(0.2),
-                    ]
-                  : [
-                      AppTheme.lightGlassColor.withOpacity(0.6),
-                      AppTheme.lightGlassColor.withOpacity(0.7),
-                    ],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: progressColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            borderColor: isDarkMode
-                ? Colors.white.withOpacity(0.1)
-                : Colors.white.withOpacity(0.5),
-            shadowColor: Colors.transparent,
-            child: Center(
-              child: Text(
-                '${localizations.workSession} ${timerModel.currentSession}/${timerModel.sessionsBeforeLongBreak}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDarkMode ? Colors.white70 : Colors.black54,
-                ),
+            child: Text(
+              '${timerModel.currentSession}/${timerModel.sessionsBeforeLongBreak}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: progressColor,
               ),
             ),
           ),
