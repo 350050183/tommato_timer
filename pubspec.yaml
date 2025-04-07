@@ -1,5 +1,5 @@
-name: tomato_timer
-description: A beautiful and functional Pomodoro timer app.
+name: tomato_app
+description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
@@ -16,10 +16,10 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.1+3
+version: 1.0.0+1
 
 environment:
-  sdk: ">=3.7.2 <4.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -39,6 +39,12 @@ dependencies:
   vibration: ^1.8.4
   url_launcher: ^6.2.5
   model_viewer_plus: ^1.7.0
+  webview_flutter: ^4.4.2
+  webview_flutter_android: ^4.3.0
+  webview_flutter_wkwebview: ^3.5.0
+  webview_flutter_web: ^0.2.3+4
+  three_dart: ^0.0.1
+  js: ^0.6.7
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -58,7 +64,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^2.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -75,6 +81,8 @@ flutter:
     - assets/sounds/
     - assets/images/
     - assets/cube/
+    - assets/cube/tomato-timer.obj
+    - assets/cube/tomato-timer.mtl
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

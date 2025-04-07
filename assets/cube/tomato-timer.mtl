@@ -1,38 +1,23 @@
-# Blender 4.4.0 MTL File: 'Untitled.blend'
+# Blender 4.4.0 MTL File: 'tomato-timer.blend'
 # www.blender.org
 
-newmtl Red_Plastic
-Kd 0.630754 0.000000 0.000000
-Ks 0.800000 0.800000 0.800000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-Pr 0.100000
-Pm 0.000000
-Ps 0.000000
-Pc 0.000000
-Pcr 0.030000
-aniso 0.000000
-anisor 0.000000
-
-newmtl White_Text
-Kd 1.000024 1.000024 1.000024
+newmtl Red
+Kd 0.800071 0.000000 0.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
-Ni 1.500000
+Ni 1.000000
 d 1.000000
-illum 2
+illum 3
 Pr 0.300000
-Pm 0.000000
+Pm 0.600000
 Ps 0.000000
 Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
 
-newmtl White_Text.002
-Kd 1.000000 1.000000 1.000000
+newmtl white-text
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000

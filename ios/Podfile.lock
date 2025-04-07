@@ -4,6 +4,9 @@ PODS:
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - flutter_gl (0.0.3):
+    - Flutter
+    - three3d_egl (~> 0.1.3)
   - flutter_local_notifications (0.0.1):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -12,20 +15,30 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - three3d_egl (0.1.3)
   - url_launcher_ios (0.0.1):
     - Flutter
   - vibration (1.7.5):
     - Flutter
+  - webview_flutter_wkwebview (0.0.1):
+    - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
+  - flutter_gl (from `.symlinks/plugins/flutter_gl/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
+
+SPEC REPOS:
+  trunk:
+    - three3d_egl
 
 EXTERNAL SOURCES:
   audioplayers_darwin:
@@ -34,6 +47,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
+  flutter_gl:
+    :path: ".symlinks/plugins/flutter_gl/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   path_provider_foundation:
@@ -44,16 +59,21 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   vibration:
     :path: ".symlinks/plugins/vibration/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
   audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_gl: 5a5603f35db897697f064027864a32b15d0c421d
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  three3d_egl: de2cd4950ad2d5f2122166c36583bde4c812e7b5
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
+  webview_flutter_wkwebview: a4af96a051138e28e29f60101d094683b9f82188
 
 PODFILE CHECKSUM: 39dd5c6fe18bc5c85df6618de009fb27512ef5d2
 

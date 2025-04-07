@@ -3,164 +3,239 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/l10n/app_localizations.dart';
 import '../widgets/glassmorphic_background.dart';
+import '../widgets/glassmorphic_container.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
-  Future<void> _launchEmail() async {
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: 'swingcoder@gmail.com',
-      queryParameters: {'subject': '关于番茄计时器 App'},
-    );
-
-    try {
-      if (!await launchUrl(emailLaunchUri)) {
-        throw Exception('无法打开邮件客户端');
-      }
-    } catch (e) {
-      debugPrint('发送邮件失败: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: Text(localizations.aboutTitle), centerTitle: true),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: GlassmorphicContainer(
+          width: 180,
+          height: 48,
+          borderRadius: 24,
+          blur: 10,
+          border: 1,
+          linearGradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDarkMode
+                ? [
+                    Colors.white.withOpacity(0.1),
+                    Colors.white.withOpacity(0.05),
+                  ]
+                : [
+                    Colors.white.withOpacity(0.7),
+                    Colors.white.withOpacity(0.4),
+                  ],
+          ),
+          borderColor: isDarkMode
+              ? Colors.white.withOpacity(0.2)
+              : Colors.white.withOpacity(0.5),
+          shadowColor: isDarkMode
+              ? Colors.black.withOpacity(0.5)
+              : Colors.black.withOpacity(0.2),
+          child: Center(
+            child: Text(
+              l10n.aboutTitle,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+        ),
+      ),
       body: GlassmorphicBackground(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 16),
-                // 番茄时钟 App Logo
-                Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const RadialGradient(
-                      colors: [Color(0xFFF44336), Color(0xFFE53935)],
-                      center: Alignment(0.1, 0.1),
-                      focal: Alignment(0.1, 0.1),
-                      radius: 0.8,
+                // Logo和版本信息
+                Center(
+                  child: GlassmorphicContainer(
+                    width: 200,
+                    height: 200,
+                    borderRadius: 100,
+                    blur: 10,
+                    border: 1.5,
+                    linearGradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDarkMode
+                          ? [
+                              Colors.white.withOpacity(0.1),
+                              Colors.white.withOpacity(0.05),
+                            ]
+                          : [
+                              Colors.white.withOpacity(0.7),
+                              Colors.white.withOpacity(0.4),
+                            ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 15,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 5),
+                    borderColor: isDarkMode
+                        ? Colors.white.withOpacity(0.2)
+                        : Colors.white.withOpacity(0.5),
+                    shadowColor: isDarkMode
+                        ? Colors.black.withOpacity(0.5)
+                        : Colors.black.withOpacity(0.2),
+                    child: Padding(
+                      padding: const EdgeInsets.all(30),
+                      child: Image.asset(
+                        'assets/images/tomato_logo.png',
+                        fit: BoxFit.contain,
                       ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.timer,
-                      size: 100,
-                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                // 应用名称和版本
-                Text(
-                  localizations.appTitle,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                // 版本信息
+                GlassmorphicContainer(
+                  width: double.infinity,
+                  height: 60,
+                  borderRadius: 20,
+                  blur: 10,
+                  border: 1,
+                  linearGradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDarkMode
+                        ? [
+                            Colors.white.withOpacity(0.1),
+                            Colors.white.withOpacity(0.05),
+                          ]
+                        : [
+                            Colors.white.withOpacity(0.7),
+                            Colors.white.withOpacity(0.4),
+                          ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${localizations.appVersion}: 1.0.1',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isDarkMode ? Colors.white70 : Colors.black54,
+                  borderColor: isDarkMode
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.white.withOpacity(0.5),
+                  shadowColor: isDarkMode
+                      ? Colors.black.withOpacity(0.5)
+                      : Colors.black.withOpacity(0.2),
+                  child: Center(
+                    child: Text(
+                      '${l10n.appVersion}: 1.0.1',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 // 应用描述
-                Text(
-                  localizations.appDescription,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isDarkMode ? Colors.white70 : Colors.black87,
+                GlassmorphicContainer(
+                  width: double.infinity,
+                  height: 120,
+                  borderRadius: 20,
+                  blur: 10,
+                  border: 1,
+                  linearGradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDarkMode
+                        ? [
+                            Colors.white.withOpacity(0.1),
+                            Colors.white.withOpacity(0.05),
+                          ]
+                        : [
+                            Colors.white.withOpacity(0.7),
+                            Colors.white.withOpacity(0.4),
+                          ],
+                  ),
+                  borderColor: isDarkMode
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.white.withOpacity(0.5),
+                  shadowColor: isDarkMode
+                      ? Colors.black.withOpacity(0.5)
+                      : Colors.black.withOpacity(0.2),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      l10n.appDescription,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 // 开发者信息
-                Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.person_outline),
-                        title: Text(localizations.developerInfo),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            Text(
-                              localizations.developerName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            GestureDetector(
-                              onTap: _launchEmail,
-                              child: Text(
-                                localizations.developerEmail,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: theme.colorScheme.primary,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
+                GlassmorphicContainer(
+                  width: double.infinity,
+                  height: 180,
+                  borderRadius: 20,
+                  blur: 10,
+                  border: 1,
+                  linearGradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDarkMode
+                        ? [
+                            Colors.white.withOpacity(0.1),
+                            Colors.white.withOpacity(0.05),
+                          ]
+                        : [
+                            Colors.white.withOpacity(0.7),
+                            Colors.white.withOpacity(0.4),
                           ],
+                  ),
+                  borderColor: isDarkMode
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.white.withOpacity(0.5),
+                  shadowColor: isDarkMode
+                      ? Colors.black.withOpacity(0.5)
+                      : Colors.black.withOpacity(0.2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        l10n.developerInfo,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 应用特点
-                Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.star_outline),
-                        title: Text(localizations.appFeatures),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            Text(localizations.feature1),
-                            Text(localizations.feature2),
-                            Text(localizations.feature3),
-                            Text(localizations.feature4),
-                            Text(localizations.feature5),
-                            Text(localizations.feature6),
-                            Text(localizations.feature7),
-                            Text(localizations.feature8),
-                          ],
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.developerName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () async {
+                          final Uri emailLaunchUri = Uri(
+                            scheme: 'mailto',
+                            path: l10n.developerEmail,
+                          );
+                          if (await canLaunchUrl(emailLaunchUri)) {
+                            await launchUrl(emailLaunchUri);
+                          }
+                        },
+                        child: Text(
+                          'Contact Developer',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                     ],

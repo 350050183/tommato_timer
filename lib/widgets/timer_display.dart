@@ -1,121 +1,67 @@
 import 'package:flutter/material.dart';
 
-import '../models/timer_model.dart';
-import '../utils/app_theme.dart';
-import '../utils/l10n/app_localizations.dart';
-import 'glassmorphic_container.dart';
-import 'tomato_3d_model.dart';
+class TimerDisplay extends StatefulWidget {
+  final Duration remainingTime;
+  final bool isRunning;
 
-class TimerDisplay extends StatelessWidget {
-  final TimerModel timerModel;
-
-  const TimerDisplay({super.key, required this.timerModel});
+  const TimerDisplay({
+    super.key,
+    required this.remainingTime,
+    required this.isRunning,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-    final size = MediaQuery.of(context).size;
+  State<TimerDisplay> createState() => _TimerDisplayState();
+}
 
-    String timerTypeText;
-    Color progressColor;
-
-    switch (timerModel.currentType) {
-      case TimerType.work:
-        timerTypeText = localizations.workSession;
-        progressColor = AppTheme.primaryColor;
-        break;
-      case TimerType.shortBreak:
-        timerTypeText = localizations.shortBreak;
-        progressColor = AppTheme.secondaryColor;
-        break;
-      case TimerType.longBreak:
-        timerTypeText = localizations.longBreak;
-        progressColor = AppTheme.accentColor;
-        break;
+class _TimerDisplayState extends State<TimerDisplay> {
+  @override
+  void didUpdateWidget(TimerDisplay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.remainingTime != widget.remainingTime) {
+      debugPrint(
+          'TimerDisplay: 剩余时间更新 - ${oldWidget.remainingTime.inSeconds} -> ${widget.remainingTime.inSeconds} 秒');
     }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 计时器类型指示
-          GlassmorphicContainer(
-            width: 200,
-            height: 45,
-            borderRadius: 22.5,
-            blur: 10,
-            border: 1,
-            linearGradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors:
-                  isDarkMode
-                      ? [
-                        AppTheme.darkGlassColor.withOpacity(0.1),
-                        AppTheme.darkGlassColor.withOpacity(0.2),
-                      ]
-                      : [
-                        AppTheme.lightGlassColor.withOpacity(0.6),
-                        AppTheme.lightGlassColor.withOpacity(0.7),
-                      ],
-            ),
-            borderColor:
-                isDarkMode
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.white.withOpacity(0.5),
-            shadowColor: Colors.transparent,
-            child: Center(
-              child: Text(
-                timerTypeText,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          // 3D 模型
-          Tomato3DModel(progress: timerModel.progress, isDarkMode: isDarkMode),
-          const SizedBox(height: 20),
-          // 时间文本
-          Text(
-            _formatDuration(timerModel.remainingTime),
-            style: TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white : Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 20),
-          // 会话计数器
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: progressColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${timerModel.currentSession}/${timerModel.sessionsBeforeLongBreak}',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: progressColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
-  String _formatDuration(Duration duration) {
+  String _formatTime(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
+    debugPrint('TimerDisplay: 格式化时间 - $minutes:$seconds');
     return '$minutes:$seconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    debugPrint(
+        'TimerDisplay: build - remainingTime: ${widget.remainingTime.inSeconds} 秒, isRunning: ${widget.isRunning}');
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 120,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 30),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.black12 : Colors.white10,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Align(
+          alignment: Alignment.center,
+          child: Text(
+            _formatTime(widget.remainingTime),
+            style: TextStyle(
+              fontSize: 35,
+              fontWeight: FontWeight.bold,
+              color: widget.isRunning
+                  ? Theme.of(context).primaryColor
+                  : (isDarkMode ? Colors.white54 : Colors.black45),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
   }
 }

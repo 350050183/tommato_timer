@@ -4,43 +4,54 @@ import '../utils/app_theme.dart';
 
 class GlassmorphicBackground extends StatelessWidget {
   final Widget child;
-  final bool useScaffoldBackground;
+  final bool useGradient;
+  final List<Color>? gradientColors;
 
   const GlassmorphicBackground({
     super.key,
     required this.child,
-    this.useScaffoldBackground = true,
+    this.useGradient = true,
+    this.gradientColors,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors:
-              isDarkMode
-                  ? [
-                    AppTheme.darkBackgroundColor,
-                    Color.lerp(
-                      AppTheme.darkBackgroundColor,
-                      AppTheme.primaryColor,
-                      0.1,
-                    )!,
-                  ]
-                  : [
-                    AppTheme.lightBackgroundColor,
-                    Color.lerp(
-                      AppTheme.lightBackgroundColor,
-                      AppTheme.primaryColor,
-                      0.1,
-                    )!,
-                  ],
-        ),
+        gradient:
+            useGradient
+                ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors:
+                      gradientColors ??
+                      (isDarkMode
+                          ? [
+                            const Color(0xFF1A1A1A),
+                            Color.lerp(
+                              const Color(0xFF1A1A1A),
+                              AppTheme.primaryColor,
+                              0.1,
+                            )!,
+                          ]
+                          : [
+                            const Color(0xFFF5F5F5),
+                            Color.lerp(
+                              const Color(0xFFF5F5F5),
+                              AppTheme.primaryColor,
+                              0.1,
+                            )!,
+                          ]),
+                )
+                : null,
+        color:
+            useGradient
+                ? null
+                : (isDarkMode
+                    ? const Color(0xFF1A1A1A)
+                    : const Color(0xFFF5F5F5)),
       ),
       child: Stack(
         children: [

@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../utils/l10n/app_localizations.dart';
-import 'timer_screen.dart';
+import '../screens/home_screen.dart';
+import '../widgets/glassmorphic_container.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -27,9 +27,9 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _scaleAnimation = Tween<double>(
-      begin: 0.8,
+      begin: 0.5,
       end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const TimerScreen()),
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
         }
       });
@@ -57,177 +57,121 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
-      body: Center(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Opacity(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors:
+                isDarkMode
+                    ? [const Color(0xFF1A1A1A), const Color(0xFF2D2D2D)]
+                    : [const Color(0xFFF5F5F5), const Color(0xFFE0E0E0)],
+          ),
+        ),
+        child: Center(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Opacity(
                 opacity: _opacityAnimation.value,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // 番茄时钟 App Logo
-                    Container(
-                      width: 180,
-                      height: 180,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const RadialGradient(
-                          colors: [Color(0xFFF44336), Color(0xFFE53935)],
-                          center: Alignment(0.1, 0.1),
-                          focal: Alignment(0.1, 0.1),
-                          radius: 0.8,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 15,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          // 番茄表面纹理
-                          Positioned.fill(
-                            child: CustomPaint(painter: TomatoTexturePainter()),
-                          ),
-                          // 计时刻度
-                          Positioned.fill(
-                            child: CustomPaint(painter: TimerMarksPainter()),
-                          ),
-                          // 番茄顶部绿叶
-                          Positioned(
-                            top: 8,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: Container(
-                                width: 16,
-                                height: 25,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF43A047),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(8),
-                                    topRight: Radius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // 左侧叶片
-                          Positioned(
-                            top: 20,
-                            left: 60,
-                            child: Transform.rotate(
-                              angle: -0.5,
-                              child: Container(
-                                width: 22,
-                                height: 12,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF43A047),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                    topRight: Radius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // 右侧叶片
-                          Positioned(
-                            top: 20,
-                            right: 60,
-                            child: Transform.rotate(
-                              angle: 0.5,
-                              child: Container(
-                                width: 22,
-                                height: 12,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF43A047),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                    topRight: Radius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // 中间白色圆圈
-                          Center(
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.15),
-                              ),
-                            ),
-                          ),
-                          // 计时指针
-                          Center(
-                            child: Transform.rotate(
-                              angle: 0.8,
-                              child: Container(
-                                width: 5,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(3),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 3,
-                                      spreadRadius: 1,
-                                    ),
+                child: Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GlassmorphicContainer(
+                        width: 200,
+                        height: 200,
+                        borderRadius: 100,
+                        blur: 10,
+                        border: 1.5,
+                        linearGradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors:
+                              isDarkMode
+                                  ? [
+                                    Colors.white.withOpacity(0.1),
+                                    Colors.white.withOpacity(0.05),
+                                  ]
+                                  : [
+                                    Colors.white.withOpacity(0.7),
+                                    Colors.white.withOpacity(0.4),
                                   ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          // 中央圆点
-                          Center(
-                            child: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
+                        borderColor:
+                            isDarkMode
+                                ? Colors.white.withOpacity(0.2)
+                                : Colors.white.withOpacity(0.5),
+                        shadowColor:
+                            isDarkMode
+                                ? Colors.black.withOpacity(0.5)
+                                : Colors.black.withOpacity(0.2),
+                        padding: const EdgeInsets.all(30),
+                        child: Image.asset(
+                          'assets/images/tomato_logo.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            debugPrint('Error loading logo: $error');
+                            return Icon(
+                              Icons.timer,
+                              size: 80,
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withOpacity(0.9),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.av_timer, color: Colors.red, size: 28),
-                        const SizedBox(width: 8),
-                        Text(
-                          localizations.appTitle,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
+                      const SizedBox(height: 30),
+                      GlassmorphicContainer(
+                        width: 160,
+                        height: 50,
+                        borderRadius: 25,
+                        blur: 8,
+                        border: 1,
+                        linearGradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors:
+                              isDarkMode
+                                  ? [
+                                    Colors.white.withOpacity(0.1),
+                                    Colors.white.withOpacity(0.05),
+                                  ]
+                                  : [
+                                    Colors.white.withOpacity(0.7),
+                                    Colors.white.withOpacity(0.4),
+                                  ],
+                        ),
+                        borderColor:
+                            isDarkMode
+                                ? Colors.white.withOpacity(0.2)
+                                : Colors.white.withOpacity(0.5),
+                        shadowColor:
+                            isDarkMode
+                                ? Colors.black.withOpacity(0.5)
+                                : Colors.black.withOpacity(0.2),
+                        child: Center(
+                          child: Text(
+                            '番茄时钟',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

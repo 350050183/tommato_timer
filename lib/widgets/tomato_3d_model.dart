@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 class Tomato3DModel extends StatefulWidget {
-  final double progress;
-  final bool isDarkMode;
+  final int currentSide;
+  final Function(int) onSideChanged;
 
   const Tomato3DModel({
     super.key,
-    required this.progress,
-    required this.isDarkMode,
+    required this.currentSide,
+    required this.onSideChanged,
   });
 
   @override
@@ -16,32 +16,40 @@ class Tomato3DModel extends StatefulWidget {
 }
 
 class _Tomato3DModelState extends State<Tomato3DModel> {
+  String _getCameraOrbit() {
+    switch (widget.currentSide) {
+      case 0:
+        return '0deg 75deg 75%'; // 正面
+      case 1:
+        return '90deg 75deg 75%'; // 右面
+      case 2:
+        return '180deg 75deg 75%'; // 背面
+      case 3:
+        return '270deg 75deg 75%'; // 左面
+      default:
+        return '0deg 75deg 75%';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building Tomato3DModel');
-    return SizedBox(
-      width: 300,
-      height: 300,
-      child: ModelViewer(
-        backgroundColor:
-            widget.isDarkMode
-                ? Colors.black.withOpacity(0.3)
-                : Colors.white.withOpacity(0.3),
-        src: 'assets/cube/tomato-timer.glb',
-        alt: '番茄计时器',
-        ar: false,
-        arModes: const ['scene-viewer', 'webxr', 'quick-look'],
-        autoRotate: true,
-        cameraControls: true,
-        disableZoom: true,
-        loading: Loading.eager,
-        autoPlay: true,
-        fieldOfView: '30deg',
-        exposure: 1.0,
-        shadowIntensity: 1,
-        shadowSoftness: 1,
-        environmentImage: 'neutral',
-      ),
+    return ModelViewer(
+      src: 'assets/models/tomato.glb',
+      alt: '番茄计时器',
+      ar: false,
+      autoRotate: true,
+      cameraControls: true,
+      disableZoom: true,
+      disablePan: false,
+      disableTap: false,
+      cameraOrbit: _getCameraOrbit(),
+      minCameraOrbit: 'auto auto 75%',
+      maxCameraOrbit: 'auto auto 75%',
+      orientation: '0deg 0deg 0deg',
+      scale: '1 1 1',
+      rotationPerSecond: '30deg',
+      interpolationDecay: 200,
+      backgroundColor: const Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
     );
   }
 }

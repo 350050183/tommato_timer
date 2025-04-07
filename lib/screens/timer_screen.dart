@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vibration/vibration.dart';
 
+import '../models/settings.dart';
 import '../models/timer_model.dart';
 import '../utils/app_theme.dart';
 import '../utils/l10n/app_localizations.dart';
-import '../widgets/control_buttons.dart';
-import '../widgets/glassmorphic_background.dart';
 import '../widgets/glassmorphic_container.dart';
+import '../widgets/timer_controls.dart';
 import '../widgets/timer_display.dart';
-import 'history_screen.dart';
-import 'settings_screen.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -26,9 +24,10 @@ class _TimerScreenState extends State<TimerScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     final timerModel = Provider.of<TimerModel>(context);
+    final settingsModel = Provider.of<SettingsModel>(context);
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final isDarkMode = settingsModel.isDarkMode;
 
     // 检测计时器完成状态变化
     if (_lastState != timerModel.state &&
@@ -40,8 +39,7 @@ class _TimerScreenState extends State<TimerScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final message =
             timerModel.currentType == TimerType.work
-                ? (timerModel.currentSession >=
-                        timerModel.sessionsBeforeLongBreak
+                ? (timerModel.currentSession >= timerModel.longBreakInterval
                     ? localizations.longBreakCompleted
                     : localizations.shortBreakCompleted)
                 : localizations.workSessionCompleted;
@@ -96,136 +94,82 @@ class _TimerScreenState extends State<TimerScreen> {
     _lastState = timerModel.state;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: GlassmorphicContainer(
-          width: 200,
-          height: 48,
-          borderRadius: 24,
-          blur: 10,
-          border: 1,
-          linearGradient: LinearGradient(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors:
                 isDarkMode
                     ? [
-                      AppTheme.darkGlassColor.withOpacity(0.1),
-                      AppTheme.darkGlassColor.withOpacity(0.2),
+                      AppTheme.darkBackgroundColor,
+                      AppTheme.darkBackgroundColor.withOpacity(0.8),
                     ]
                     : [
-                      AppTheme.lightGlassColor.withOpacity(0.6),
-                      AppTheme.lightGlassColor.withOpacity(0.7),
+                      AppTheme.lightBackgroundColor,
+                      AppTheme.lightBackgroundColor.withOpacity(0.8),
                     ],
           ),
-          borderColor:
-              isDarkMode
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.white.withOpacity(0.5),
-          shadowColor: Colors.transparent,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.av_timer,
-                color: isDarkMode ? Colors.white : AppTheme.primaryColor,
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                localizations.appTitle,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
         ),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: GlassmorphicBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                Expanded(child: TimerDisplay(timerModel: timerModel)),
-                ControlButtons(timerModel: timerModel),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ),
-      bottomNavigationBar: ClipRRect(
-        child: Container(
-          height: 70,
-          decoration: BoxDecoration(
-            color:
-                isDarkMode
-                    ? AppTheme.darkGlassColor.withOpacity(0.2)
-                    : AppTheme.lightGlassColor.withOpacity(0.7),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            border: Border.all(
-              color:
-                  isDarkMode
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.white.withOpacity(0.6),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          child: Column(
             children: [
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HistoryScreen(),
+              // 顶部状态栏
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 设置按钮
+                    IconButton(
+                      icon: Icon(
+                        Icons.settings,
+                        color: isDarkMode ? Colors.white : Colors.black87,
                       ),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.history,
-                    color: isDarkMode ? Colors.white70 : Colors.black54,
-                  ),
-                  label: Text(
-                    localizations.historyButton,
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/settings');
+                      },
                     ),
-                  ),
+                    // 历史记录按钮
+                    IconButton(
+                      icon: Icon(
+                        Icons.history,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/history');
+                      },
+                    ),
+                  ],
                 ),
               ),
+              // 主要内容
               Expanded(
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsScreen(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 3D模型和时间显示
+                    Expanded(child: TimerDisplay()),
+                    // 控制按钮
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: TimerControls(
+                        isRunning: timerModel.isRunning,
+                        onStart: () {
+                          timerModel.start();
+                        },
+                        onStop: () {
+                          timerModel.stop();
+                        },
+                        onReset: () {
+                          timerModel.reset();
+                        },
+                        onSkip: () {
+                          timerModel.skipToNext();
+                        },
                       ),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.settings,
-                    color: isDarkMode ? Colors.white70 : Colors.black54,
-                  ),
-                  label: Text(
-                    localizations.settingsButton,
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black54,
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],

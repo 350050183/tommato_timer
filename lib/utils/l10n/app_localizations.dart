@@ -8,17 +8,56 @@ class AppLocalizations {
 
   AppLocalizations(this.locale);
 
-  static AppLocalizations of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+      AppLocalizationsDelegate();
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': en,
     'zh': zh,
   };
+
+  String get appName =>
+      _localizedValues[locale.languageCode]?['appName'] ?? en['appName']!;
+  String get settings =>
+      _localizedValues[locale.languageCode]?['settings'] ?? en['settings']!;
+  String get notifications =>
+      _localizedValues[locale.languageCode]?['notifications'] ??
+      en['notifications']!;
+  String get display =>
+      _localizedValues[locale.languageCode]?['display'] ?? en['display']!;
+  String get about =>
+      _localizedValues[locale.languageCode]?['about'] ?? en['about']!;
+  String get enableNotifications =>
+      _localizedValues[locale.languageCode]?['enableNotifications'] ??
+      en['enableNotifications']!;
+  String get enableVibration =>
+      _localizedValues[locale.languageCode]?['enableVibration'] ??
+      en['enableVibration']!;
+  String get keepScreenOn =>
+      _localizedValues[locale.languageCode]?['keepScreenOn'] ??
+      en['keepScreenOn']!;
+  String get darkMode =>
+      _localizedValues[locale.languageCode]?['darkMode'] ?? en['darkMode']!;
+  String get language =>
+      _localizedValues[locale.languageCode]?['language'] ?? en['language']!;
+  String get version =>
+      _localizedValues[locale.languageCode]?['version'] ?? en['version']!;
+  String get feedback =>
+      _localizedValues[locale.languageCode]?['feedback'] ?? en['feedback']!;
+  String get privacyPolicy =>
+      _localizedValues[locale.languageCode]?['privacyPolicy'] ??
+      en['privacyPolicy']!;
+  String get termsOfService =>
+      _localizedValues[locale.languageCode]?['termsOfService'] ??
+      en['termsOfService']!;
+  String get chinese =>
+      _localizedValues[locale.languageCode]?['chinese'] ?? en['chinese']!;
+  String get english =>
+      _localizedValues[locale.languageCode]?['english'] ?? en['english']!;
 
   String get appTitle =>
       _localizedValues[locale.languageCode]?['appTitle'] ?? en['appTitle']!;
@@ -73,23 +112,9 @@ class AppLocalizations {
   String get notificationSettings =>
       _localizedValues[locale.languageCode]?['notificationSettings'] ??
       en['notificationSettings']!;
-  String get enableNotifications =>
-      _localizedValues[locale.languageCode]?['enableNotifications'] ??
-      en['enableNotifications']!;
-  String get enableVibration =>
-      _localizedValues[locale.languageCode]?['enableVibration'] ??
-      en['enableVibration']!;
-
   String get displaySettings =>
       _localizedValues[locale.languageCode]?['displaySettings'] ??
       en['displaySettings']!;
-  String get keepScreenOn =>
-      _localizedValues[locale.languageCode]?['keepScreenOn'] ??
-      en['keepScreenOn']!;
-  String get darkMode =>
-      _localizedValues[locale.languageCode]?['darkMode'] ?? en['darkMode']!;
-  String get language =>
-      _localizedValues[locale.languageCode]?['language'] ?? en['language']!;
   String get appInfo =>
       _localizedValues[locale.languageCode]?['appInfo'] ?? en['appInfo']!;
 
@@ -142,10 +167,6 @@ class AppLocalizations {
   String get systemDefault =>
       _localizedValues[locale.languageCode]?['systemDefault'] ??
       en['systemDefault']!;
-  String get english =>
-      _localizedValues[locale.languageCode]?['english'] ?? en['english']!;
-  String get chinese =>
-      _localizedValues[locale.languageCode]?['chinese'] ?? en['chinese']!;
 
   // About page
   String get appVersion =>
@@ -186,9 +207,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['feature8'] ?? en['feature8']!;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
-  const _AppLocalizationsDelegate();
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) {
@@ -201,5 +221,5 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool shouldReload(_AppLocalizationsDelegate old) => false;
+  bool shouldReload(AppLocalizationsDelegate old) => false;
 }

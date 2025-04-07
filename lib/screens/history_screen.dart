@@ -13,7 +13,7 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final timerModel = Provider.of<TimerModel>(context);
     final history = timerModel.history;
     final theme = Theme.of(context);
@@ -32,25 +32,23 @@ class HistoryScreen extends StatelessWidget {
           linearGradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors:
-                isDarkMode
-                    ? [
-                      AppTheme.darkGlassColor.withOpacity(0.1),
-                      AppTheme.darkGlassColor.withOpacity(0.2),
-                    ]
-                    : [
-                      AppTheme.lightGlassColor.withOpacity(0.6),
-                      AppTheme.lightGlassColor.withOpacity(0.7),
-                    ],
+            colors: isDarkMode
+                ? [
+                    AppTheme.darkGlassColor.withOpacity(0.1),
+                    AppTheme.darkGlassColor.withOpacity(0.2),
+                  ]
+                : [
+                    AppTheme.lightGlassColor.withOpacity(0.6),
+                    AppTheme.lightGlassColor.withOpacity(0.7),
+                  ],
           ),
-          borderColor:
-              isDarkMode
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.white.withOpacity(0.5),
+          borderColor: isDarkMode
+              ? Colors.white.withOpacity(0.1)
+              : Colors.white.withOpacity(0.5),
           shadowColor: Colors.transparent,
           child: Center(
             child: Text(
-              localizations.historyTitle,
+              l10n.historyTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -61,102 +59,95 @@ class HistoryScreen extends StatelessWidget {
         ),
         centerTitle: true,
         elevation: 0,
-        actions:
-            history.isNotEmpty
-                ? [
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              backgroundColor:
-                                  isDarkMode
-                                      ? AppTheme.darkGlassColor.withOpacity(0.7)
-                                      : AppTheme.lightGlassColor.withOpacity(
-                                        0.8,
-                                      ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                side: BorderSide(
-                                  color:
-                                      isDarkMode
-                                          ? Colors.white.withOpacity(0.1)
-                                          : Colors.white.withOpacity(0.5),
-                                ),
+        actions: history.isNotEmpty
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: isDarkMode
+                            ? AppTheme.darkGlassColor.withOpacity(0.7)
+                            : AppTheme.lightGlassColor.withOpacity(
+                                0.8,
                               ),
-                              title: Text(localizations.clearHistory),
-                              content: Text('确定要清空所有历史记录吗？'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text(localizations.cancel),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    timerModel.clearHistory();
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text(localizations.save),
-                                ),
-                              ],
-                            ),
-                      );
-                    },
-                  ),
-                ]
-                : null,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: isDarkMode
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.white.withOpacity(0.5),
+                          ),
+                        ),
+                        title: Text(l10n.clearHistory),
+                        content: Text('确定要清空所有历史记录吗？'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(l10n.cancel),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              timerModel.clearHistory();
+                              Navigator.pop(context);
+                            },
+                            child: Text(l10n.save),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ]
+            : null,
       ),
       body: GlassmorphicBackground(
         child: SafeArea(
-          child:
-              history.isEmpty
-                  ? Center(
-                    child: GlassmorphicContainer(
-                      width: 250,
-                      height: 80,
-                      borderRadius: 15,
-                      blur: 10,
-                      border: 1,
-                      linearGradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors:
-                            isDarkMode
-                                ? [
-                                  AppTheme.darkGlassColor.withOpacity(0.1),
-                                  AppTheme.darkGlassColor.withOpacity(0.2),
-                                ]
-                                : [
-                                  AppTheme.lightGlassColor.withOpacity(0.6),
-                                  AppTheme.lightGlassColor.withOpacity(0.7),
-                                ],
-                      ),
-                      borderColor:
-                          isDarkMode
-                              ? Colors.white.withOpacity(0.1)
-                              : Colors.white.withOpacity(0.5),
-                      shadowColor: Colors.transparent,
-                      child: Center(
-                        child: Text(
-                          localizations.noHistoryMessage,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: isDarkMode ? Colors.white : Colors.black87,
-                          ),
+          child: history.isEmpty
+              ? Center(
+                  child: GlassmorphicContainer(
+                    width: 250,
+                    height: 80,
+                    borderRadius: 15,
+                    blur: 10,
+                    border: 1,
+                    linearGradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDarkMode
+                          ? [
+                              AppTheme.darkGlassColor.withOpacity(0.1),
+                              AppTheme.darkGlassColor.withOpacity(0.2),
+                            ]
+                          : [
+                              AppTheme.lightGlassColor.withOpacity(0.6),
+                              AppTheme.lightGlassColor.withOpacity(0.7),
+                            ],
+                    ),
+                    borderColor: isDarkMode
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.white.withOpacity(0.5),
+                    shadowColor: Colors.transparent,
+                    child: Center(
+                      child: Text(
+                        l10n.noHistoryMessage,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                       ),
                     ),
-                  )
-                  : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: history.length,
-                    itemBuilder: (context, index) {
-                      final item = history[history.length - 1 - index]; // 倒序显示
-                      return HistoryListItem(item: item);
-                    },
                   ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: history.length,
+                  itemBuilder: (context, index) {
+                    final item = history[history.length - 1 - index]; // 倒序显示
+                    return HistoryListItem(item: item);
+                  },
+                ),
         ),
       ),
     );
@@ -170,7 +161,7 @@ class HistoryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final formattedDate = dateFormat.format(item.timestamp);
     final theme = Theme.of(context);
@@ -181,15 +172,15 @@ class HistoryListItem extends StatelessWidget {
 
     switch (item.type) {
       case TimerType.work:
-        sessionType = localizations.workSession;
+        sessionType = l10n.workSession;
         sessionColor = AppTheme.primaryColor;
         break;
       case TimerType.shortBreak:
-        sessionType = localizations.shortBreak;
+        sessionType = l10n.shortBreak;
         sessionColor = AppTheme.secondaryColor;
         break;
       case TimerType.longBreak:
-        sessionType = localizations.longBreak;
+        sessionType = l10n.longBreak;
         sessionColor = AppTheme.accentColor;
         break;
     }
@@ -198,7 +189,7 @@ class HistoryListItem extends StatelessWidget {
     final int minutes = item.actualDurationSeconds ~/ 60;
     final int seconds = item.actualDurationSeconds % 60;
     final String actualDurationText =
-        '$minutes ${localizations.minutes} $seconds ${localizations.seconds}';
+        '$minutes ${l10n.minutes} $seconds ${l10n.seconds}';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -216,10 +207,9 @@ class HistoryListItem extends StatelessWidget {
             sessionColor.withOpacity(isDarkMode ? 0.15 : 0.2),
           ],
         ),
-        borderColor:
-            isDarkMode
-                ? Colors.white.withOpacity(0.1)
-                : Colors.white.withOpacity(0.5),
+        borderColor: isDarkMode
+            ? Colors.white.withOpacity(0.1)
+            : Colors.white.withOpacity(0.5),
         shadowColor: sessionColor.withOpacity(0.1),
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -266,7 +256,7 @@ class HistoryListItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${item.durationMinutes} ${localizations.minutes}',
+                    '${item.durationMinutes} ${l10n.minutes}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: sessionColor,
@@ -285,7 +275,7 @@ class HistoryListItem extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${localizations.actualDuration}: ',
+                  '${l10n.actualDuration}: ',
                   style: TextStyle(
                     color: isDarkMode ? Colors.white70 : Colors.grey[700],
                     fontWeight: FontWeight.w500,

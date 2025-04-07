@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../services/notification_service.dart';
@@ -13,7 +14,7 @@ class TimerHistory {
   final DateTime timestamp;
   final TimerType type;
   final int durationMinutes;
-  final int actualDurationSeconds; // 实际持续时间（秒）
+  final int actualDurationSeconds;
 
   TimerHistory({
     required this.timestamp,
@@ -45,7 +46,7 @@ class TimerHistory {
 }
 
 class TimerModel extends ChangeNotifier {
-  Settings settings;
+  final Settings _settings;
   final NotificationService _notificationService = NotificationService();
 
   Timer? _timer;
@@ -56,71 +57,112 @@ class TimerModel extends ChangeNotifier {
   Duration _remainingTime = const Duration(minutes: 25);
   Duration _totalTime = const Duration(minutes: 25);
   List<TimerHistory> _history = [];
-  bool _hasStarted = false; // 追踪当前计时器是否已经开始过
+  bool _hasStarted = false;
+  bool _isRunning = false;
+  int _currentSide = 0;
+  String _displayTime = '00:00';
 
-  TimerModel({required this.settings}) {
-    _resetTimer();
+  TimerModel({required Settings settings}) : _settings = settings {
+    debugPrint('初始化 TimerModel');
+    _remainingTime = const Duration(minutes: 25);
+    _totalTime = _remainingTime;
+    _updateDisplayTime();
   }
 
-  // 更新设置
-  void updateSettings(Settings newSettings) {
-    settings = newSettings;
-    onSettingsUpdated();
-  }
-
-  // 添加设置更新监听器
-  void onSettingsUpdated() {
-    // 如果计时器正在运行，先停止它
-    _timer?.cancel();
-    _state = TimerState.initial;
-    _hasStarted = false;
-
-    // 根据当前计时器类型重置时间
-    _setTimerDuration();
-
-    notifyListeners();
-  }
-
+  Settings get settings => _settings;
   TimerState get state => _state;
   TimerType get currentType => _currentType;
   int get currentSession => _currentSession;
-  int get sessionsBeforeLongBreak => settings.sessionsBeforeLongBreak;
   int get totalCompletedSessions => _totalCompletedSessions;
   Duration get remainingTime => _remainingTime;
   Duration get totalTime => _totalTime;
   List<TimerHistory> get history => _history;
+  bool get isRunning => _isRunning;
+  int get currentSide => _currentSide;
+  String get displayTime => _displayTime;
 
   double get progress {
     if (_totalTime.inSeconds == 0) return 0;
     final elapsed = _totalTime.inSeconds - _remainingTime.inSeconds;
-    return elapsed / _totalTime.inSeconds;
+    final progress = elapsed / _totalTime.inSeconds;
+    debugPrint(
+        '计算进度: 总时间=${_totalTime.inSeconds}秒, 剩余时间=${_remainingTime.inSeconds}秒, 已用时间=$elapsed秒, 进度=$progress');
+    return progress;
+  }
+
+  void setCurrentSide(int side) {
+    debugPrint('设置当前面: 从 $_currentSide 到 $side');
+    if (_currentSide != side) {
+      _currentSide = side;
+      notifyListeners();
+    }
+  }
+
+  void _updateDisplayTime() {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(_remainingTime.inMinutes);
+    final seconds = twoDigits(_remainingTime.inSeconds.remainder(60));
+    _displayTime = '$minutes:$seconds';
+    debugPrint('更新显示时间: $_displayTime (剩余${_remainingTime.inSeconds}秒)');
+    notifyListeners();
   }
 
   void startTimer() {
-    if (_state == TimerState.running) return;
+    if (!_isRunning) {
+      debugPrint(
+          '开始计时: 状态=${_state}, 类型=${_currentType}, 剩余时间=${_remainingTime.inMinutes}分钟');
+      _isRunning = true;
+      _hasStarted = true;
+      _state = TimerState.running;
+      notifyListeners();
+    }
+  }
 
-    _state = TimerState.running;
-    _hasStarted = true; // 标记计时器已开始
-    _timer = Timer.periodic(const Duration(seconds: 1), _timerCallback);
-    notifyListeners();
+  void tick() {
+    if (!_isRunning) return;
+
+    debugPrint('计时器tick: 剩余时间=${_remainingTime.inSeconds}秒, 运行状态=$_isRunning');
+    if (_remainingTime.inSeconds <= 1) {
+      debugPrint('计时结束');
+      if (_currentType == TimerType.work) {
+        _completeWorkSession(true);
+      } else {
+        _completeBreak(_currentType == TimerType.longBreak);
+      }
+      _hasStarted = false;
+      pauseTimer();
+    } else {
+      _remainingTime = _remainingTime - const Duration(seconds: 1);
+      debugPrint(
+          '计时进行中: 剩余${_remainingTime.inMinutes}分钟${_remainingTime.inSeconds % 60}秒');
+      _updateDisplayTime();
+      notifyListeners();
+    }
   }
 
   void pauseTimer() {
-    if (_state != TimerState.running) return;
-
-    _state = TimerState.paused;
-    _timer?.cancel();
-    notifyListeners();
+    if (_isRunning) {
+      debugPrint(
+          '停止计时: 状态=${_state}, 剩余时间=${_remainingTime.inMinutes}分钟${_remainingTime.inSeconds % 60}秒');
+      _isRunning = false;
+      _state = TimerState.paused;
+      notifyListeners();
+    }
   }
 
-  void resetTimer() {
-    _resetTimer();
-    _hasStarted = false; // 重置时清除开始状态
+  void reset() {
+    debugPrint('重置计时器: 当前状态=${_state}');
+    pauseTimer();
+    _hasStarted = false;
+    _state = TimerState.initial;
+    _remainingTime = const Duration(minutes: 25);
+    _totalTime = _remainingTime;
+    debugPrint('重置后: 状态=${_state}, 剩余时间=${_remainingTime.inMinutes}分钟');
+    _updateDisplayTime();
     notifyListeners();
   }
 
   void skipToNext() {
-    // 临时保存当前状态，用于判断是否需要记录历史
     final wasStarted = _hasStarted;
     final currentType = _currentType;
 
@@ -131,20 +173,26 @@ class TimerModel extends ChangeNotifier {
     }
 
     _state = TimerState.initial;
-    _hasStarted = false; // 重置开始状态
+    _hasStarted = false;
     notifyListeners();
   }
 
   void _timerCallback(Timer timer) {
+    debugPrint('定时器回调开始: 剩余时间=${_remainingTime.inSeconds}秒, 运行状态=$_isRunning');
     if (_remainingTime.inSeconds <= 1) {
-      // Timer completed
+      debugPrint('计时结束');
       if (_currentType == TimerType.work) {
-        _completeWorkSession(true); // 计时结束，肯定已经开始过
+        _completeWorkSession(true);
       } else {
-        _completeBreak(_currentType == TimerType.longBreak); // 只记录长休息
+        _completeBreak(_currentType == TimerType.longBreak);
       }
+      _hasStarted = false;
+      pauseTimer();
     } else {
       _remainingTime = _remainingTime - const Duration(seconds: 1);
+      debugPrint(
+          '计时进行中: 剩余${_remainingTime.inMinutes}分钟${_remainingTime.inSeconds % 60}秒');
+      _updateDisplayTime();
     }
     notifyListeners();
   }
@@ -152,52 +200,49 @@ class TimerModel extends ChangeNotifier {
   void _resetTimer() {
     _timer?.cancel();
     _state = TimerState.initial;
-
     _setTimerDuration();
   }
 
   void _setTimerDuration() {
+    debugPrint('设置计时器时长: 当前类型=$_currentType');
     switch (_currentType) {
       case TimerType.work:
-        _remainingTime = Duration(minutes: settings.workDurationMinutes);
+        _remainingTime = const Duration(minutes: 25);
         _totalTime = _remainingTime;
         break;
       case TimerType.shortBreak:
-        _remainingTime = Duration(minutes: settings.shortBreakDurationMinutes);
+        _remainingTime = const Duration(minutes: 5);
         _totalTime = _remainingTime;
         break;
       case TimerType.longBreak:
-        _remainingTime = Duration(minutes: settings.longBreakDurationMinutes);
+        _remainingTime = const Duration(minutes: 15);
         _totalTime = _remainingTime;
         break;
     }
+    debugPrint(
+        '计时器时长已设置: 总时间=${_totalTime.inMinutes}分钟, 剩余时间=${_remainingTime.inMinutes}分钟');
   }
 
   void _completeWorkSession(bool addToHistory) {
     _timer?.cancel();
     _state = TimerState.finished;
 
-    // 添加通知
     if (settings.notificationsEnabled) {
-      final nextBreakType =
-          _currentSession >= settings.sessionsBeforeLongBreak ? "长休息" : "短休息";
+      final nextBreakType = _currentSession >= 4 ? "长休息" : "短休息";
       _notificationService.showWorkSessionCompleted(
         "工作阶段完成，现在开始$nextBreakType！",
       );
     }
 
-    // 只有当计时器已经开始过时才添加到历史记录
     if (addToHistory) {
-      // 计算实际持续的时间
       final int actualDurationSeconds =
           _totalTime.inSeconds - _remainingTime.inSeconds;
 
-      // Add to history
       _history.add(
         TimerHistory(
           timestamp: DateTime.now(),
           type: TimerType.work,
-          durationMinutes: settings.workDurationMinutes,
+          durationMinutes: 25,
           actualDurationSeconds: actualDurationSeconds,
         ),
       );
@@ -205,8 +250,7 @@ class TimerModel extends ChangeNotifier {
       _totalCompletedSessions++;
     }
 
-    // Determine next break type
-    if (_currentSession >= settings.sessionsBeforeLongBreak) {
+    if (_currentSession >= 4) {
       _currentType = TimerType.longBreak;
       _currentSession = 1;
     } else {
@@ -221,35 +265,27 @@ class TimerModel extends ChangeNotifier {
     _timer?.cancel();
     _state = TimerState.finished;
 
-    // 添加通知
     if (settings.notificationsEnabled) {
-      final message =
-          _currentType == TimerType.longBreak
-              ? "长休息结束，开始新的工作阶段！"
-              : "短休息结束，开始新的工作阶段！";
+      final message = _currentType == TimerType.longBreak
+          ? "长休息结束，开始新的工作阶段！"
+          : "短休息结束，开始新的工作阶段！";
       _notificationService.showBreakCompleted(message);
     }
 
-    // 只有需要添加到历史记录时才添加
     if (addToHistory) {
       final int actualDurationSeconds =
           _totalTime.inSeconds - _remainingTime.inSeconds;
 
-      // Add to history
       _history.add(
         TimerHistory(
           timestamp: DateTime.now(),
-          type: _currentType, // 使用当前类型
-          durationMinutes:
-              _currentType == TimerType.longBreak
-                  ? settings.longBreakDurationMinutes
-                  : settings.shortBreakDurationMinutes,
+          type: _currentType,
+          durationMinutes: _currentType == TimerType.longBreak ? 15 : 5,
           actualDurationSeconds: actualDurationSeconds,
         ),
       );
     }
 
-    // Next session is always work
     _currentType = TimerType.work;
     _setTimerDuration();
   }
