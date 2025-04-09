@@ -46,6 +46,7 @@ class TimerProvider extends ChangeNotifier {
         debugPrint('TimerProvider: 计时器完成，准备播放声音');
         _playCompletionSound();
       }
+      resetTimer();
     } else if (_timerModel.state != TimerState.finished) {
       _isCompleted = false;
     }

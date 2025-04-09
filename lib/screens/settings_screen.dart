@@ -57,12 +57,6 @@ class SettingsScreen extends StatelessWidget {
                           settings.keepScreenOn,
                           (value) => settingsModel.setKeepScreenOn(value),
                         ),
-                        _buildSwitchTile(
-                          context,
-                          l10n.darkMode,
-                          settings.isDarkMode,
-                          (value) => settingsModel.setDarkMode(value),
-                        ),
                         _buildLanguageTile(context, l10n, settingsModel),
                       ],
                     ),

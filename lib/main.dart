@@ -36,6 +36,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LocalizationProvider()),
         ChangeNotifierProvider(
           create: (context) => SettingsModel(settings: settings),
         ),

@@ -188,6 +188,7 @@ class TimerModel extends ChangeNotifier {
       }
       _hasStarted = false;
       pauseTimer();
+      reset();
     } else {
       _remainingTime = _remainingTime - const Duration(seconds: 1);
       debugPrint(
