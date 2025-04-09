@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tomato_app/utils/l10n/app_localizations.dart';
 
 import '../providers/timer_provider.dart';
 import '../widgets/control_buttons.dart';
@@ -48,7 +49,7 @@ class HomeScreen extends StatelessWidget {
               : Colors.black.withOpacity(0.2),
           child: Center(
             child: Text(
-              '3D番茄时钟',
+              AppLocalizations.of(context)!.appTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -135,6 +136,9 @@ class HomeScreen extends StatelessWidget {
                       onDurationSelected: (duration) {
                         timerProvider.setSelectedDuration(duration);
                       },
+                      onRotationChanged: (x, y, z) {
+                        timerProvider.handleCubeRotation();
+                      },
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -195,5 +199,11 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _handleCubeRotation() {
+    // 删除这个日志（如果存在）
+    // debugPrint('HomeScreen: 处理3D旋转');
+    // ... 其他代码
   }
 }

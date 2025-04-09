@@ -8,10 +8,12 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class ThreeDCube extends StatefulWidget {
   final Function(int)? onDurationSelected;
+  final Function(double x, double y, double z)? onRotationChanged;
 
   const ThreeDCube({
     super.key,
     this.onDurationSelected,
+    this.onRotationChanged,
   });
 
   @override
@@ -35,19 +37,19 @@ class _ThreeDCubeState extends State<ThreeDCube> {
 
   Future<void> _loadModelFiles() async {
     try {
-      debugPrint('开始加载模型文件...');
+      // debugPrint('开始加载模型文件...');
       final objBytes = await rootBundle.load('assets/cube/tomato-timer.obj');
       final mtlBytes = await rootBundle.load('assets/cube/tomato-timer.mtl');
 
       _objContent = base64Encode(objBytes.buffer.asUint8List());
       _mtlContent = base64Encode(mtlBytes.buffer.asUint8List());
 
-      debugPrint(
-        '模型文件加载成功，OBJ大小: ${_objContent?.length}, MTL大小: ${_mtlContent?.length}',
-      );
+      // debugPrint(
+      //   '模型文件加载成功，OBJ大小: ${_objContent?.length}, MTL大小: ${_mtlContent?.length}',
+      // );
       _initializeWebView();
     } catch (e) {
-      debugPrint('加载模型文件失败: $e');
+      // debugPrint('加载模型文件失败: $e');
       setState(() {
         _errorMessage = '加载模型文件失败: $e';
       });
@@ -56,14 +58,14 @@ class _ThreeDCubeState extends State<ThreeDCube> {
 
   Future<void> _initializeWebView() async {
     if (_objContent == null || _mtlContent == null) {
-      debugPrint('模型文件内容为空');
+      // debugPrint('模型文件内容为空');
       return;
     }
 
     try {
-      debugPrint('开始初始化WebView...');
+      // debugPrint('开始初始化WebView...');
       final String htmlContent = await _loadHtmlTemplate();
-      debugPrint('HTML模板加载成功');
+      // debugPrint('HTML模板加载成功');
 
       final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -73,24 +75,24 @@ class _ThreeDCubeState extends State<ThreeDCube> {
           'Flutter',
           onMessageReceived: (JavaScriptMessage message) {
             try {
-              debugPrint('收到JavaScript消息: ${message.message}');
+              // debugPrint('收到JavaScript消息: ${message.message}');
               _onMessageReceived(message.message);
             } catch (e) {
-              debugPrint('处理JavaScript消息失败: $e');
+              // debugPrint('处理JavaScript消息失败: $e');
             }
           },
         )
         ..setNavigationDelegate(
           NavigationDelegate(
             onPageFinished: (String url) {
-              debugPrint('页面加载完成: $url');
+              // debugPrint('页面加载完成: $url');
               setState(() {
                 _isWebViewLoaded = true;
               });
               _initializeThreeJS();
             },
             onWebResourceError: (WebResourceError error) {
-              debugPrint('Web资源错误: ${error.description}');
+              // debugPrint('Web资源错误: ${error.description}');
               setState(() {
                 _errorMessage = 'Web资源错误: ${error.description}';
               });
@@ -102,9 +104,9 @@ class _ThreeDCubeState extends State<ThreeDCube> {
       setState(() {
         _controller = controller;
       });
-      debugPrint('WebView初始化完成');
+      // debugPrint('WebView初始化完成');
     } catch (e) {
-      debugPrint('初始化WebView失败: $e');
+      // debugPrint('初始化WebView失败: $e');
       setState(() {
         _errorMessage = '初始化WebView失败: $e';
       });
@@ -408,14 +410,21 @@ class _ThreeDCubeState extends State<ThreeDCube> {
 
   void _onMessageReceived(String message) {
     try {
+      // debugPrint('收到了来自JavaScript的消息: ${message.message}');
       final data = jsonDecode(message);
-      if (data['type'] == 'faceSelected') {
+      if (data['type'] == 'rotation') {
+        final rotation = data['rotation'] as Map<String, dynamic>;
+        final x = rotation['x'] as double;
+        final y = rotation['y'] as double;
+        final z = rotation['z'] as double;
+        widget.onRotationChanged?.call(x, y, z);
+      } else if (data['type'] == 'select') {
         final duration = data['duration'] as int;
-        debugPrint('选择了 $duration 分钟的页面');
+        // debugPrint('选择了 $duration 分钟的页面');
         widget.onDurationSelected?.call(duration);
       }
     } catch (e) {
-      debugPrint('解析消息失败: $e');
+      // debugPrint('解析消息失败: $e');
     }
   }
 

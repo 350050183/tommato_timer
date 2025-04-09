@@ -81,7 +81,7 @@ class HistoryScreen extends StatelessWidget {
                           ),
                         ),
                         title: Text(l10n.clearHistory),
-                        content: Text('确定要清空所有历史记录吗？'),
+                        content: const Text('确定要清空所有历史记录吗？'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),

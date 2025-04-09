@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/app_theme.dart';
 
 class TimerProgressIndicator extends StatelessWidget {
   final double progress;
@@ -7,22 +8,15 @@ class TimerProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300,
-      height: 8,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: progress,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return LinearProgressIndicator(
+      value: progress,
+      backgroundColor: isDarkMode ? Colors.white12 : Colors.black12,
+      valueColor: AlwaysStoppedAnimation<Color>(
+        isDarkMode
+            ? AppTheme.primaryColor.withOpacity(0.8)
+            : AppTheme.primaryColor,
       ),
     );
   }

@@ -16,7 +16,7 @@ const Map<String, String> en = {
   'chinese': 'Chinese',
   'english': 'English',
 
-  'appTitle': 'Tomato Timer',
+  'appTitle': '3D Tomato Timer',
   'startButton': 'Start',
   'pauseButton': 'Pause',
   'resetButton': 'Reset',

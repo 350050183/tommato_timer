@@ -18,24 +18,17 @@ class _TimerDisplayState extends State<TimerDisplay> {
   @override
   void didUpdateWidget(TimerDisplay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.remainingTime != widget.remainingTime) {
-      debugPrint(
-          'TimerDisplay: 剩余时间更新 - ${oldWidget.remainingTime.inSeconds} -> ${widget.remainingTime.inSeconds} 秒');
-    }
   }
 
   String _formatTime(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    debugPrint('TimerDisplay: 格式化时间 - $minutes:$seconds');
     return '$minutes:$seconds';
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-        'TimerDisplay: build - remainingTime: ${widget.remainingTime.inSeconds} 秒, isRunning: ${widget.isRunning}');
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
@@ -56,7 +49,9 @@ class _TimerDisplayState extends State<TimerDisplay> {
               fontWeight: FontWeight.bold,
               color: widget.isRunning
                   ? Theme.of(context).primaryColor
-                  : (isDarkMode ? Colors.white54 : Colors.black45),
+                  : (isDarkMode
+                      ? Colors.white.withOpacity(0.9)
+                      : Colors.black45),
             ),
             textAlign: TextAlign.center,
           ),

@@ -39,13 +39,15 @@ class TimerProvider extends ChangeNotifier {
   }
 
   void _onTimerChanged() {
-    debugPrint('TimerProvider: 计时器状态变化');
+    // debugPrint('TimerProvider: 计时器状态变化');
     if (_timerModel.state == TimerState.finished && !_isCompleted) {
       _isCompleted = true;
       if (_settings.notificationsEnabled) {
-        debugPrint('TimerProvider: 计时器完成，准备播放声音');
+        // debugPrint('TimerProvider: 计时器完成，准备播放声音');
         _playCompletionSound();
       }
+      _tickTimer?.cancel();
+      _tickTimer = null;
     } else if (_timerModel.state != TimerState.finished) {
       _isCompleted = false;
     }
@@ -53,32 +55,39 @@ class TimerProvider extends ChangeNotifier {
   }
 
   Future<void> _loadSound() async {
+    // debugPrint('TimerProvider: 开始加载声音文件');
+    // debugPrint('TimerProvider: 设置AudioPlayer日志级别为info');
     try {
-      debugPrint('TimerProvider: 开始加载声音文件');
-      AudioLogger.logLevel = AudioLogLevel.info;
-      debugPrint('TimerProvider: 设置AudioPlayer日志级别为info');
       await _audioPlayer.setSource(AssetSource('sounds/complete.mp3'));
       _isSoundLoaded = true;
-      debugPrint('TimerProvider: 声音文件加载成功');
+      // debugPrint('TimerProvider: 声音文件加载成功');
     } catch (e) {
-      debugPrint('TimerProvider: 加载声音文件失败: $e');
+      // debugPrint('TimerProvider: 加载声音文件失败: $e');
     }
   }
 
   void startTimer() {
-    if (_tickTimer != null) return;
+    if (_tickTimer != null) {
+      // debugPrint('TimerProvider: 计时器已经在运行');
+      return;
+    }
 
-    debugPrint('TimerProvider: 开始计时');
+    if (_isCompleted) {
+      // debugPrint('TimerProvider: 重置已完成的计时器');
+      resetTimer();
+    }
+
+    // debugPrint('TimerProvider: 开始计时');
     _timerModel.startTimer();
     _tickTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      debugPrint('TimerProvider: tick, 当前时间: ${DateTime.now()}');
+      // debugPrint('TimerProvider: tick, 当前时间: ${DateTime.now()}');
       _timerModel.tick();
     });
     notifyListeners();
   }
 
   void pauseTimer() {
-    debugPrint('TimerProvider: 暂停计时');
+    // debugPrint('TimerProvider: 暂停计时');
     _tickTimer?.cancel();
     _tickTimer = null;
     _timerModel.pauseTimer();
@@ -86,7 +95,7 @@ class TimerProvider extends ChangeNotifier {
   }
 
   void resetTimer() {
-    debugPrint('TimerProvider: 重置计时器');
+    // debugPrint('TimerProvider: 重置计时器');
     _tickTimer?.cancel();
     _tickTimer = null;
     _timerModel.reset();
@@ -94,7 +103,7 @@ class TimerProvider extends ChangeNotifier {
   }
 
   void skipToNext() {
-    debugPrint('TimerProvider: 跳到下一个');
+    // debugPrint('TimerProvider: 跳到下一个');
     _tickTimer?.cancel();
     _tickTimer = null;
     _timerModel.skipToNext();
@@ -102,34 +111,35 @@ class TimerProvider extends ChangeNotifier {
   }
 
   void handleCubeRotation() {
-    debugPrint('TimerProvider: 处理3D旋转');
+    // debugPrint('TimerProvider: 处理3D旋转');
     if (_timerModel.isRunning) {
-      debugPrint('TimerProvider: 计时器正在运行，保持运行状态');
+      // debugPrint('TimerProvider: 计时器正在运行，保持运行状态');
       return;
     }
   }
 
   void setSelectedDuration(int minutes) {
-    debugPrint('TimerProvider: 设置选择的时间: $minutes 分钟');
+    // debugPrint('TimerProvider: 设置选择的时间: $minutes 分钟');
     if (!_timerModel.isRunning) {
       _timerModel.setSelectedDuration(minutes);
+      _isCompleted = false;
       notifyListeners();
     } else {
-      debugPrint('TimerProvider: 计时器运行中，忽略时间设置');
+      // debugPrint('TimerProvider: 计时器运行中，忽略时间设置');
     }
   }
 
   Future<void> _playCompletionSound() async {
-    debugPrint('TimerProvider: 开始播放声音');
+    // debugPrint('TimerProvider: 开始播放声音');
     if (!_isSoundLoaded) {
-      debugPrint('TimerProvider: 声音文件未加载，开始加载');
+      // debugPrint('TimerProvider: 声音文件未加载，开始加载');
       await _loadSound();
     }
     try {
       await _audioPlayer.play(AssetSource('sounds/complete.mp3'));
-      debugPrint('TimerProvider: 声音播放成功');
+      // debugPrint('TimerProvider: 声音播放成功');
     } catch (e) {
-      debugPrint('TimerProvider: 播放声音失败: $e');
+      // debugPrint('TimerProvider: 播放声音失败: $e');
     }
   }
 

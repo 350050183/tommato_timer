@@ -20,23 +20,21 @@ class GlassmorphicBackground extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient:
-            useGradient
-                ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors:
-                      gradientColors ??
-                      (isDarkMode
-                          ? [
+        gradient: useGradient
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors ??
+                    (isDarkMode
+                        ? [
                             const Color(0xFF1A1A1A),
                             Color.lerp(
                               const Color(0xFF1A1A1A),
                               AppTheme.primaryColor,
-                              0.1,
+                              0.15,
                             )!,
                           ]
-                          : [
+                        : [
                             const Color(0xFFF5F5F5),
                             Color.lerp(
                               const Color(0xFFF5F5F5),
@@ -44,14 +42,11 @@ class GlassmorphicBackground extends StatelessWidget {
                               0.1,
                             )!,
                           ]),
-                )
-                : null,
-        color:
-            useGradient
-                ? null
-                : (isDarkMode
-                    ? const Color(0xFF1A1A1A)
-                    : const Color(0xFFF5F5F5)),
+              )
+            : null,
+        color: useGradient
+            ? null
+            : (isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5)),
       ),
       child: Stack(
         children: [

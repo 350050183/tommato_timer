@@ -1,6 +1,6 @@
 {
-    "name": "Tomato Timer",
-    "short_name": "Tomato Timer",
+    "name": "3D Tomato Timer",
+    "short_name": "3D Tomato Timer",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FF0000",

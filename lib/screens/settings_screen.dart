@@ -17,8 +17,19 @@ class SettingsScreen extends StatelessWidget {
     final settings = settingsModel.settings;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          l10n.settings,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
       body: GlassmorphicBackground(
-        useGradient: true,
         child: SafeArea(
           child: CustomScrollView(
             slivers: [
@@ -27,6 +38,18 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    ListTile(
+                      title: Text(
+                        l10n.settings,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode
+                              ? Colors.white.withOpacity(0.9)
+                              : Colors.black87,
+                        ),
+                      ),
+                    ),
                     _buildSection(
                       context,
                       l10n.notifications,
@@ -56,12 +79,6 @@ class SettingsScreen extends StatelessWidget {
                           l10n.keepScreenOn,
                           settings.keepScreenOn,
                           (value) => settingsModel.setKeepScreenOn(value),
-                        ),
-                        _buildSwitchTile(
-                          context,
-                          l10n.darkMode,
-                          settings.isDarkMode,
-                          (value) => settingsModel.setDarkMode(value),
                         ),
                         _buildLanguageTile(context, l10n, settingsModel),
                       ],

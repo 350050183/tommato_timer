@@ -232,7 +232,7 @@ class AboutScreen extends StatelessWidget {
                           }
                         },
                         child: Text(
-                          'Contact Developer',
+                          l10n.contactDeveloper,
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                           ),

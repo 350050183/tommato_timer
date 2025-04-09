@@ -65,10 +65,9 @@ class _SplashScreenState extends State<SplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors:
-                isDarkMode
-                    ? [const Color(0xFF1A1A1A), const Color(0xFF2D2D2D)]
-                    : [const Color(0xFFF5F5F5), const Color(0xFFE0E0E0)],
+            colors: isDarkMode
+                ? [const Color(0xFF1A1A1A), const Color(0xFF2D2D2D)]
+                : [const Color(0xFFF5F5F5), const Color(0xFFE0E0E0)],
           ),
         ),
         child: Center(
@@ -91,31 +90,28 @@ class _SplashScreenState extends State<SplashScreen>
                         linearGradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors:
-                              isDarkMode
-                                  ? [
-                                    Colors.white.withOpacity(0.1),
-                                    Colors.white.withOpacity(0.05),
-                                  ]
-                                  : [
-                                    Colors.white.withOpacity(0.7),
-                                    Colors.white.withOpacity(0.4),
-                                  ],
+                          colors: isDarkMode
+                              ? [
+                                  Colors.white.withOpacity(0.1),
+                                  Colors.white.withOpacity(0.05),
+                                ]
+                              : [
+                                  Colors.white.withOpacity(0.7),
+                                  Colors.white.withOpacity(0.4),
+                                ],
                         ),
-                        borderColor:
-                            isDarkMode
-                                ? Colors.white.withOpacity(0.2)
-                                : Colors.white.withOpacity(0.5),
-                        shadowColor:
-                            isDarkMode
-                                ? Colors.black.withOpacity(0.5)
-                                : Colors.black.withOpacity(0.2),
+                        borderColor: isDarkMode
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.white.withOpacity(0.5),
+                        shadowColor: isDarkMode
+                            ? Colors.black.withOpacity(0.5)
+                            : Colors.black.withOpacity(0.2),
                         padding: const EdgeInsets.all(30),
                         child: Image.asset(
                           'assets/images/tomato_logo.png',
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) {
-                            debugPrint('Error loading logo: $error');
+                            // debugPrint('Error loading logo: $error');
                             return Icon(
                               Icons.timer,
                               size: 80,
@@ -136,25 +132,22 @@ class _SplashScreenState extends State<SplashScreen>
                         linearGradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors:
-                              isDarkMode
-                                  ? [
-                                    Colors.white.withOpacity(0.1),
-                                    Colors.white.withOpacity(0.05),
-                                  ]
-                                  : [
-                                    Colors.white.withOpacity(0.7),
-                                    Colors.white.withOpacity(0.4),
-                                  ],
+                          colors: isDarkMode
+                              ? [
+                                  Colors.white.withOpacity(0.1),
+                                  Colors.white.withOpacity(0.05),
+                                ]
+                              : [
+                                  Colors.white.withOpacity(0.7),
+                                  Colors.white.withOpacity(0.4),
+                                ],
                         ),
-                        borderColor:
-                            isDarkMode
-                                ? Colors.white.withOpacity(0.2)
-                                : Colors.white.withOpacity(0.5),
-                        shadowColor:
-                            isDarkMode
-                                ? Colors.black.withOpacity(0.5)
-                                : Colors.black.withOpacity(0.2),
+                        borderColor: isDarkMode
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.white.withOpacity(0.5),
+                        shadowColor: isDarkMode
+                            ? Colors.black.withOpacity(0.5)
+                            : Colors.black.withOpacity(0.2),
                         child: Center(
                           child: Text(
                             '番茄时钟',
@@ -181,11 +174,10 @@ class _SplashScreenState extends State<SplashScreen>
 class TomatoTexturePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.white.withOpacity(0.1)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1;
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
 
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
@@ -212,11 +204,10 @@ class TomatoTexturePainter extends CustomPainter {
 class TimerMarksPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.white.withOpacity(0.2)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1;
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
 
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;

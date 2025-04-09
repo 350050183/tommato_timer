@@ -71,7 +71,7 @@ class Settings {
 }
 
 class SettingsModel extends ChangeNotifier {
-  Settings _settings = Settings(
+  Settings _settings = const Settings(
     isDarkMode: false,
     notificationsEnabled: true,
     vibrationEnabled: true,
@@ -149,9 +149,7 @@ class SettingsModel extends ChangeNotifier {
   }
 
   Future<void> saveSettings() async {
-    if (_prefs == null) {
-      _prefs = await SharedPreferences.getInstance();
-    }
+    _prefs ??= await SharedPreferences.getInstance();
     await _prefs?.setString(
       'settings',
       json.encode(_settings.toJson()),

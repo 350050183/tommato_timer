@@ -149,7 +149,7 @@ class _TimerScreenState extends State<TimerScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // 3D模型和时间显示
-                    Expanded(child: TimerDisplay()),
+                    const Expanded(child: TimerDisplay()),
                     // 控制按钮
                     Padding(
                       padding: const EdgeInsets.all(16.0),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/l10n/app_localizations.dart';
+
 class ControlButtons extends StatelessWidget {
   final bool isRunning;
   final VoidCallback onStart;
@@ -16,6 +18,8 @@ class ControlButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -28,7 +32,7 @@ class ControlButtons extends StatelessWidget {
             ),
           ),
           child: Text(
-            isRunning ? '暂停' : '开始',
+            isRunning ? l10n.pauseButton : l10n.startButton,
             style: const TextStyle(fontSize: 18),
           ),
         ),
@@ -41,7 +45,7 @@ class ControlButtons extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          child: const Text('重置', style: TextStyle(fontSize: 18)),
+          child: Text(l10n.resetButton, style: const TextStyle(fontSize: 18)),
         ),
       ],
     );
