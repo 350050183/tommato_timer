@@ -17,6 +17,25 @@ class SettingsScreen extends StatelessWidget {
     final settings = settingsModel.settings;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          l10n.settings,
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
       body: GlassmorphicBackground(
         useGradient: true,
         child: SafeArea(
@@ -59,7 +78,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         _buildLanguageTile(context, l10n, settingsModel),
                       ],
-                    ),
+                    ), 
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
