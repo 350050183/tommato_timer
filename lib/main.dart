@@ -24,7 +24,7 @@ void main() async {
     }
   }
 
-  final settings = Settings(
+  const settings = Settings(
     isDarkMode: false,
     notificationsEnabled: true,
     vibrationEnabled: true,
