@@ -63,7 +63,7 @@ class SettingsScreen extends StatelessWidget {
                           settings.vibrationEnabled,
                           (value) => settingsModel.setVibrationEnabled(value),
                         ),
-                      ],j
+                      ],
                     ),
                     const SizedBox(height: 16),
                     _buildSection(
@@ -78,7 +78,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         _buildLanguageTile(context, l10n, settingsModel),
                       ],
-                    ), 
+                    ),
                     const SizedBox(height: 16),
                     _buildSection(
                       context,
