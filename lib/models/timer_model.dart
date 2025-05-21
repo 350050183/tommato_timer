@@ -161,6 +161,16 @@ class TimerModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setRemainingTime(Duration newTime) {
+    if (newTime.isNegative) {
+      _remainingTime = Duration.zero;
+    } else {
+      _remainingTime = newTime;
+    }
+    _updateDisplayTime();
+    // notifyListeners(); // Already called by _updateDisplayTime
+  }
+
   void skipToNext() {
     final wasStarted = _hasStarted;
     final currentType = _currentType;
