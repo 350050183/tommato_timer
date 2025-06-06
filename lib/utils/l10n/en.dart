@@ -66,7 +66,7 @@ const Map<String, String> en = {
   'appDescription':
       'A simple and elegant Pomodoro timer app that helps you stay focused and productive.',
   'developerInfo': 'Developer Information',
-  'developerName': 'Wu Kun',
+  'developerName': 'swingcoder',
   'developerEmail': 'wukun@example.com',
   'contactDeveloper': 'Contact Developer',
   'appFeatures': 'Features',

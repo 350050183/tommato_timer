@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../utils/l10n/app_localizations.dart';
+import 'package:tomato_app/utils/l10n/app_localizations.dart';
 
 class ControlButtons extends StatelessWidget {
   final bool isRunning;
@@ -32,7 +31,9 @@ class ControlButtons extends StatelessWidget {
             ),
           ),
           child: Text(
-            isRunning ? l10n.pauseButton : l10n.startButton,
+            isRunning
+                ? AppLocalizations.of(context)!.pauseButton
+                : AppLocalizations.of(context)!.startButton,
             style: const TextStyle(fontSize: 18),
           ),
         ),
@@ -45,7 +46,10 @@ class ControlButtons extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          child: Text(l10n.resetButton, style: const TextStyle(fontSize: 18)),
+          child: Text(
+            AppLocalizations.of(context)!.resetButton,
+            style: const TextStyle(fontSize: 18),
+          ),
         ),
       ],
     );

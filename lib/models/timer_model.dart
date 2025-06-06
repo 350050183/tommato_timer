@@ -109,7 +109,8 @@ class TimerModel extends ChangeNotifier {
 
   void startTimer() {
     if (!_isRunning) {
-      // debugPrint('开始计时: 状态=$_state, 类型=$_currentType, 剩余时间=${_remainingTime.inMinutes}分钟');
+      debugPrint(
+          '开始计时: 状态=$_state, 类型=$_currentType, 剩余时间=${_remainingTime.inMinutes}分钟');
       _isRunning = true;
       _hasStarted = true;
       _state = TimerState.running;
@@ -141,8 +142,8 @@ class TimerModel extends ChangeNotifier {
 
   void pauseTimer() {
     if (_isRunning) {
-      // debugPrint(
-      //     '停止计时: 状态=$_state, 剩余时间=${_remainingTime.inMinutes}分钟${_remainingTime.inSeconds % 60}秒');
+      debugPrint(
+          '停止计时: 状态=$_state, 剩余时间=${_remainingTime.inMinutes}分钟${_remainingTime.inSeconds % 60}秒');
       _isRunning = false;
       _state = TimerState.paused;
       notifyListeners();
@@ -150,13 +151,13 @@ class TimerModel extends ChangeNotifier {
   }
 
   void reset() {
-    // debugPrint('重置计时器: 当前状态=$_state');
+    debugPrint('重置计时器: 当前状态=$_state');
     pauseTimer();
     _hasStarted = false;
     _state = TimerState.initial;
     _remainingTime = const Duration(minutes: 25);
     _totalTime = _remainingTime;
-    // debugPrint('重置后: 状态=$_state, 剩余时间=${_remainingTime.inMinutes}分钟');
+    debugPrint('重置后: 状态=$_state, 剩余时间=${_remainingTime.inMinutes}分钟');
     _updateDisplayTime();
     notifyListeners();
   }
@@ -187,6 +188,7 @@ class TimerModel extends ChangeNotifier {
       }
       _hasStarted = false;
       pauseTimer();
+      reset();
     } else {
       _remainingTime = _remainingTime - const Duration(seconds: 1);
       // debugPrint(

@@ -20,11 +20,18 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: Text(
           l10n.settings,
           style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white : Colors.black87,
           ),
         ),
