@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tomato_app/utils/l10n/app_localizations.dart';
 
 import '../providers/timer_provider.dart';
 import '../widgets/control_buttons.dart';
