@@ -76,12 +76,10 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
-		<string>processing</string>
 		<string>remote-notification</string>
-		<string>audio</string>
-		<string>background-fetch</string>
-		<string>background-processing</string>
 	</array>
+	<key>NSUserNotificationAlertStyle</key>
+	<string>alert</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.tomato.timer.tick</string>
