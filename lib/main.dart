@@ -12,7 +12,6 @@ import 'package:tomato_app/utils/l10n/app_localizations.dart';
 import 'package:tomato_app/utils/routes.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
-import 'package:vibration/vibration.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
