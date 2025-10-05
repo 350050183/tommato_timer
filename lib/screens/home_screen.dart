@@ -48,7 +48,7 @@ class HomeScreen extends StatelessWidget {
               : Colors.black.withOpacity(0.2),
           child: Center(
             child: Text(
-              '3D Tomato Timer',
+              '3D番茄时间',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,

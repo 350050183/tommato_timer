@@ -1,6 +1,6 @@
 {
-    "name": "3D Tomato Timer",
-    "short_name": "3D Tomato Timer",
+    "name": "3D番茄时间",
+    "short_name": "3D番茄时间",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FF0000",

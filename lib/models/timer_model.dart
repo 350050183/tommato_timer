@@ -61,7 +61,8 @@ class TimerModel extends ChangeNotifier {
   bool _isRunning = false;
   int _currentSide = 0;
   String _displayTime = '00:00';
-
+  int longBreakInterval = 5;
+  
   TimerModel({required Settings settings}) : _settings = settings {
     debugPrint('初始化 TimerModel');
     _remainingTime = const Duration(minutes: 25);
