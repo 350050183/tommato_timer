@@ -115,6 +115,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-if (await Vibration.hasVibrator() ?? false) {
-  Vibration.vibrate();
-}
+// if (Vibration.hasVibrator() ?? false) {
+//   Vibration.vibrate();
+// }
