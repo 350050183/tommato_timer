@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:tomato_app/models/settings.dart';
 import 'package:tomato_app/models/timer.dart';
 import 'package:tomato_app/providers/timer_provider.dart';
@@ -14,6 +15,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   if (!kIsWeb) {
@@ -112,3 +114,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// if (Vibration.hasVibrator() ?? false) {
+//   Vibration.vibrate();
+// }

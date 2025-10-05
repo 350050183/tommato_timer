@@ -12,7 +12,7 @@ import '../widgets/timer_display.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
-
+  
   @override
   State<TimerScreen> createState() => _TimerScreenState();
 }
@@ -40,9 +40,9 @@ class _TimerScreenState extends State<TimerScreen> {
         final message =
             timerModel.currentType == TimerType.work
                 ? (timerModel.currentSession >= timerModel.longBreakInterval
-                    ? localizations.longBreakCompleted
-                    : localizations.shortBreakCompleted)
-                : localizations.workSessionCompleted;
+                    ? localizations?.longBreakCompleted
+                    : localizations?.shortBreakCompleted)
+                : localizations?.workSessionCompleted;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -73,7 +73,7 @@ class _TimerScreenState extends State<TimerScreen> {
               shadowColor: Colors.transparent,
               child: Center(
                 child: Text(
-                  message,
+                  message??'结束',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -149,17 +149,17 @@ class _TimerScreenState extends State<TimerScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // 3D模型和时间显示
-                    const Expanded(child: TimerDisplay()),
+                    const Expanded(child: TimerDisplay(remainingTime: Duration(seconds: 15*60),isRunning: false)),
                     // 控制按钮
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: TimerControls(
                         isRunning: timerModel.isRunning,
                         onStart: () {
-                          timerModel.start();
+                          timerModel.startTimer();
                         },
                         onStop: () {
-                          timerModel.stop();
+                          timerModel.pauseTimer();
                         },
                         onReset: () {
                           timerModel.reset();

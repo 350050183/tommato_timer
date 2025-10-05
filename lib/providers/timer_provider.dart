@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'package:workmanager/workmanager.dart';
 
 import '../models/settings.dart';
@@ -94,11 +97,19 @@ class TimerProvider extends ChangeNotifier {
       _endTime = DateTime.parse(data['end_time']);
       final remainingSeconds = _endTime!.difference(DateTime.now()).inSeconds;
       if (remainingSeconds > 0) {
-        _timerModel.setSelectedDuration(remainingSeconds ~/ 60);
-        startTimer();
+        // 如果还有剩余时间，可以选择恢复倒计时（如需自动恢复可保留此逻辑）
+        // _timerModel.setSelectedDuration(remainingSeconds ~/ 60);
+        // startTimer();
+        // 但根据需求，强制退出后不自动恢复，直接重置
+        resetTimer();
       } else {
+        // 已超时，直接重置
+        resetTimer();
         await prefs.remove('timer_data');
       }
+    } else {
+      // 没有计时器数据，也重置
+      resetTimer();
     }
   }
 
@@ -125,6 +136,16 @@ class TimerProvider extends ChangeNotifier {
       iOS: iosSettings,
     );
     await _notifications.initialize(initSettings);
+
+    final bool? granted = await _notifications
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+    debugPrint('iOS 通知权限: $granted');
   }
 
   Future<void> _initializeWorkmanager() async {
@@ -218,24 +239,14 @@ class TimerProvider extends ChangeNotifier {
     _endTime = DateTime.now().add(_timerModel.remainingTime);
     _saveTimerState();
 
-    // 注册后台任务
-    Workmanager().registerPeriodicTask(
-      'tickTimer',
-      'tickTimer',
-      frequency: const Duration(minutes: 1),
-      initialDelay: const Duration(seconds: 1),
-      constraints: Constraints(
-        networkType: NetworkType.not_required,
-        requiresBatteryNotLow: false,
-        requiresCharging: false,
-        requiresDeviceIdle: false,
-        requiresStorageNotLow: false,
-      ),
-    );
+    // iOS/Android: 统一用本地通知安排到点提醒，确保后台/杀进程时也能通知
+    if (_endTime != null) {
+      _scheduleIOSLocalNotification(_endTime!);
+    }
 
-    // 使用Timer.periodic来保持计时器在前台运行
+    // 前台用 Timer 实时刷新 UI，后台由本地通知负责提醒
     _tickTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      // debugPrint('TimerProvider: tick, 当前时间: ${DateTime.now()}');
+      debugPrint('TimerProvider: tick, 当前时间: \\${DateTime.now()}');
       _timerModel.tick();
       if (_timerModel.state == TimerState.finished) {
         timer.cancel();
@@ -248,6 +259,36 @@ class TimerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 安排本地通知，确保 App 在后台/杀进程时也能到点提醒
+  Future<void> _scheduleIOSLocalNotification(DateTime endTime) async {
+    final now = DateTime.now();
+    final seconds = endTime.difference(now).inSeconds;
+    if (seconds <= 0) return;
+    await _notifications.zonedSchedule(
+      0,
+      '计时器完成',
+      '当前计时阶段已完成',
+      tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds)),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'timer_channel',
+          '计时器通知',
+          channelDescription: '计时器完成时的通知',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
   void pauseTimer() {
     // debugPrint('TimerProvider: 暂停计时');
     _tickTimer?.cancel();
@@ -255,8 +296,13 @@ class TimerProvider extends ChangeNotifier {
     _timerModel.pauseTimer();
     _endTime = null;
     _saveTimerState();
-    // 取消后台任务
-    Workmanager().cancelByUniqueName('tickTimer');
+    // 取消后台任务/本地通知
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      _notifications.cancel(0);
+    } else {
+      Workmanager().cancelByUniqueName('tickTimer');
+    }
+    _notifications.cancelAll();
     notifyListeners();
   }
 
@@ -268,8 +314,13 @@ class TimerProvider extends ChangeNotifier {
     _stopSound();
     _endTime = null;
     _saveTimerState();
-    // 取消后台任务
-    Workmanager().cancelByUniqueName('tickTimer');
+    // 取消后台任务/本地通知
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      _notifications.cancel(0);
+    } else {
+      Workmanager().cancelByUniqueName('tickTimer');
+    }
+    _notifications.cancelAll();
     notifyListeners();
   }
 
@@ -316,8 +367,8 @@ class TimerProvider extends ChangeNotifier {
       await _loadSound();
     }
     try {
-      // 设置音频播放器为后台模式
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      // 设置音频播放器为正常模式（不循环）
+      await _audioPlayer.setReleaseMode(ReleaseMode.stop);
       await _audioPlayer.setVolume(1.0);
       await _audioPlayer.setPlaybackRate(1.0);
 
@@ -345,16 +396,11 @@ class TimerProvider extends ChangeNotifier {
       // 重新加载声音文件
       await _audioPlayer.setSource(AssetSource('sounds/complete.mp3'));
 
-      // 播放声音
+      // 播放声音（只播放一次）
       await _audioPlayer.play(AssetSource('sounds/complete.mp3'));
       debugPrint('TimerProvider: 开始播放声音');
 
-      // 监听播放状态
-      _audioPlayer.onPlayerStateChanged.listen((state) {
-        debugPrint('TimerProvider: 播放状态变化: $state');
-      });
-
-      // 监听播放完成事件
+      // 可选：监听播放完成事件（不做任何处理）
       _audioPlayer.onPlayerComplete.listen((event) {
         debugPrint('TimerProvider: 播放完成');
       });
