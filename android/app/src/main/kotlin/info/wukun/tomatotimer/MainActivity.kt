@@ -1,4 +1,4 @@
-package com.example.tomato_app
+package info.wukun.tomatotimer
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -5,76 +5,42 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:workmanager/workmanager.dart';
+// import 'package:workmanager/workmanager.dart';
 
 import '../models/settings.dart';
 import '../models/timer.dart';
 
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) async {
-    debugPrint('Native called background task: $taskName');
-    if (taskName == 'tickTimer') {
-      final prefs = await SharedPreferences.getInstance();
-      final timerData = prefs.getString('timer_data');
-      if (timerData != null) {
-        final data = jsonDecode(timerData);
-        final endTime = DateTime.parse(data['end_time']);
-        final now = DateTime.now();
+// @pragma('vm:entry-point')
+// void callbackDispatcher() {
+//   Workmanager().executeTask((taskName, inputData) async {
+//     debugPrint('Native called background task: $taskName');
+//     if (taskName == 'tickTimer') {
+//       final prefs = await SharedPreferences.getInstance();
+//       final timerData = prefs.getString('timer_data');
+//       if (timerData != null) {
+//         final data = jsonDecode(timerData);
+//         final endTime = DateTime.parse(data['end_time']);
+//         final now = DateTime.now();
 
-        if (now.isAfter(endTime)) {
-          // 计时器已结束，发送通知
-          final FlutterLocalNotificationsPlugin
-              flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
-
-          const androidDetails = AndroidNotificationDetails(
-            'timer_channel',
-            '计时器通知',
-            channelDescription: '计时器完成时的通知',
-            importance: Importance.high,
-            priority: Priority.high,
-          );
-          const iosDetails = DarwinNotificationDetails(
-            presentAlert: true,
-            presentBadge: true,
-            presentSound: true,
-          );
-          const details = NotificationDetails(
-            android: androidDetails,
-            iOS: iosDetails,
-          );
-
-          await flutterLocalNotificationsPlugin.show(
-            0,
-            '计时器完成',
-            '当前计时阶段已完成',
-            details,
-          );
-
-          // 清除计时器数据
-          await prefs.remove('timer_data');
-        }
-      }
-      return true;
-    }
-    return false;
-  });
-}
+//         if (now.isAfter(endTime)) {
+//           // 计时器已结束，清除数据
+//           await prefs.remove('timer_data');
+//         }
+//       }
+//       return true;
+//     }
+//     return false;
+//   });
+// }
 
 class TimerProvider extends ChangeNotifier {
   final TimerModel _timerModel;
   final Settings _settings;
   final AudioPlayer _audioPlayer = AudioPlayer();
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
   Timer? _tickTimer;
   bool _isSoundLoaded = false;
   bool _isCompleted = false;
-  int _notificationId = 0;
   DateTime? _endTime;
 
   TimerProvider({
@@ -84,8 +50,7 @@ class TimerProvider extends ChangeNotifier {
         _settings = settings {
     _loadSound();
     _timerModel.addListener(_onTimerChanged);
-    _initializeNotifications();
-    _initializeWorkmanager();
+    // _initializeWorkmanager();
     _loadTimerState();
   }
 
@@ -123,37 +88,12 @@ class TimerProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _initializeNotifications() async {
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/launcher_icon');
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
-    await _notifications.initialize(initSettings);
-
-    final bool? granted = await _notifications
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-    debugPrint('iOS 通知权限: $granted');
-  }
-
-  Future<void> _initializeWorkmanager() async {
-    await Workmanager().initialize(
-      callbackDispatcher,
-      isInDebugMode: true,
-    );
-  }
+  // Future<void> _initializeWorkmanager() async {
+  //   await Workmanager().initialize(
+  //     callbackDispatcher,
+  //     isInDebugMode: true,
+  //   );
+  // }
 
   TimerModel get timerModel => _timerModel;
   Settings get settings => _settings;
@@ -177,38 +117,12 @@ class TimerProvider extends ChangeNotifier {
       if (_settings.notificationsEnabled) {
         // debugPrint('TimerProvider: 计时器完成，准备播放声音');
         _playCompletionSound();
-        _showCompletionNotification();
       }
       resetTimer();
     } else if (_timerModel.state != TimerState.finished) {
       _isCompleted = false;
     }
     notifyListeners();
-  }
-
-  Future<void> _showCompletionNotification() async {
-    const androidDetails = AndroidNotificationDetails(
-      'timer_channel',
-      '计时器通知',
-      channelDescription: '计时器完成时的通知',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-    await _notifications.show(
-      _notificationId++,
-      '计时器完成',
-      '当前计时阶段已完成',
-      details,
-    );
   }
 
   Future<void> _loadSound() async {
@@ -239,14 +153,9 @@ class TimerProvider extends ChangeNotifier {
     _endTime = DateTime.now().add(_timerModel.remainingTime);
     _saveTimerState();
 
-    // iOS/Android: 统一用本地通知安排到点提醒，确保后台/杀进程时也能通知
-    if (_endTime != null) {
-      _scheduleIOSLocalNotification(_endTime!);
-    }
-
-    // 前台用 Timer 实时刷新 UI，后台由本地通知负责提醒
+    // 前台用 Timer 实时刷新 UI
     _tickTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      debugPrint('TimerProvider: tick, 当前时间: \\${DateTime.now()}');
+      debugPrint('TimerProvider: tick, 当前时间: ${DateTime.now()}');
       _timerModel.tick();
       if (_timerModel.state == TimerState.finished) {
         timer.cancel();
@@ -259,36 +168,6 @@ class TimerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 安排本地通知，确保 App 在后台/杀进程时也能到点提醒
-  Future<void> _scheduleIOSLocalNotification(DateTime endTime) async {
-    final now = DateTime.now();
-    final seconds = endTime.difference(now).inSeconds;
-    if (seconds <= 0) return;
-    await _notifications.zonedSchedule(
-      0,
-      '计时器完成',
-      '当前计时阶段已完成',
-      tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds)),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'timer_channel',
-          '计时器通知',
-          channelDescription: '计时器完成时的通知',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-  }
-
   void pauseTimer() {
     // debugPrint('TimerProvider: 暂停计时');
     _tickTimer?.cancel();
@@ -296,13 +175,8 @@ class TimerProvider extends ChangeNotifier {
     _timerModel.pauseTimer();
     _endTime = null;
     _saveTimerState();
-    // 取消后台任务/本地通知
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      _notifications.cancel(0);
-    } else {
-      Workmanager().cancelByUniqueName('tickTimer');
-    }
-    _notifications.cancelAll();
+    // 取消后台任务
+    // Workmanager().cancelByUniqueName('tickTimer');
     notifyListeners();
   }
 
@@ -314,13 +188,8 @@ class TimerProvider extends ChangeNotifier {
     _stopSound();
     _endTime = null;
     _saveTimerState();
-    // 取消后台任务/本地通知
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      _notifications.cancel(0);
-    } else {
-      Workmanager().cancelByUniqueName('tickTimer');
-    }
-    _notifications.cancelAll();
+    // 取消后台任务
+    // Workmanager().cancelByUniqueName('tickTimer');
     notifyListeners();
   }
 

@@ -179,19 +179,15 @@ class _ThreeDCubeState extends State<ThreeDCube> {
           let scene, camera, renderer, cube;
           let isDragging = false;
           let previousMousePosition = { x: 0, y: 0 };
+          let lastSelectedDuration = null;
+          let lastDetectionTime = 0;
           const container = document.getElementById('container');
           const loading = document.getElementById('loading');
           
           function sendMessageToFlutter(message) {
             try {
               console.log('发送消息前:', message);
-              const messageData = {
-                type: 'faceSelected',
-                duration: message.duration
-              };
-              
-              console.log('格式化后的消息:', messageData);
-              const messageStr = JSON.stringify(messageData);
+              const messageStr = JSON.stringify(message);
               
               if (window.Flutter) {
                 window.Flutter.postMessage(messageStr);
@@ -314,6 +310,11 @@ class _ThreeDCubeState extends State<ThreeDCube> {
               
               window.addEventListener('resize', onWindowResize);
               
+              // 初始化完成后检测当前面
+              setTimeout(() => {
+                detectCurrentFace();
+              }, 100);
+              
               loading.style.display = 'none';
               console.log('Three.js初始化完成');
             } catch (error) {
@@ -374,17 +375,23 @@ class _ThreeDCubeState extends State<ThreeDCube> {
               }
             }
             
-            if (selectedFace && maxDot > 0.7) { // 阈值保持0.7，确保检测的灵敏度
-              console.log('检测到面: ' + selectedFace.duration + ' 分钟, 相似度: ' + maxDot);
-              try {
-                const message = {
-                  type: 'faceSelected',
-                  duration: selectedFace.duration
-                };
-                console.log('准备发送消息:', message);
-                sendMessageToFlutter(message);
-              } catch (error) {
-                console.error('发送消息失败:', error);
+            if (selectedFace && maxDot > 0.5) { // 降低阈值到0.5，提高检测灵敏度
+              const currentTime = Date.now();
+              // 防抖：如果是同一个面且距离上次检测时间小于500ms，则不重复发送
+              if (selectedFace.duration !== lastSelectedDuration || currentTime - lastDetectionTime > 500) {
+                console.log('检测到面: ' + selectedFace.duration + ' 分钟, 相似度: ' + maxDot);
+                try {
+                  const message = {
+                    type: 'faceSelected',
+                    duration: selectedFace.duration
+                  };
+                  console.log('准备发送消息:', message);
+                  sendMessageToFlutter(message);
+                  lastSelectedDuration = selectedFace.duration;
+                  lastDetectionTime = currentTime;
+                } catch (error) {
+                  console.error('发送消息失败:', error);
+                }
               }
             }
           }
@@ -410,7 +417,7 @@ class _ThreeDCubeState extends State<ThreeDCube> {
 
   void _onMessageReceived(String message) {
     try {
-      // debugPrint('收到了来自JavaScript的消息: ${message.message}');
+      // debugPrint('收到了来自JavaScript的消息: $message');
       final data = jsonDecode(message);
       if (data['type'] == 'rotation') {
         final rotation = data['rotation'] as Map<String, dynamic>;
@@ -418,13 +425,13 @@ class _ThreeDCubeState extends State<ThreeDCube> {
         final y = rotation['y'] as double;
         final z = rotation['z'] as double;
         widget.onRotationChanged?.call(x, y, z);
-      } else if (data['type'] == 'select') {
+      } else if (data['type'] == 'select' || data['type'] == 'faceSelected') {
         final duration = data['duration'] as int;
-        // debugPrint('选择了 $duration 分钟的页面');
+        debugPrint('选择了 $duration 分钟的页面');
         widget.onDurationSelected?.call(duration);
       }
     } catch (e) {
-      // debugPrint('解析消息失败: $e');
+      debugPrint('解析消息失败: $e, 原始消息: $message');
     }
   }
 

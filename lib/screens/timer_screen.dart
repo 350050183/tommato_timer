@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vibration/vibration.dart';
+// import 'package:vibration/vibration.dart';
 
 import '../models/settings.dart';
 import '../models/timer_model.dart';
@@ -33,7 +33,7 @@ class _TimerScreenState extends State<TimerScreen> {
     if (_lastState != timerModel.state &&
         timerModel.state == TimerState.finished) {
       // 震动提醒
-      Vibration.vibrate(duration: 1000);
+      // Vibration.vibrate(duration: 1000);
 
       // 延迟一下，让界面先渲染完成
       WidgetsBinding.instance.addPostFrameCallback((_) {

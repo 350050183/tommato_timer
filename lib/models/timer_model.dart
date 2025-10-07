@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../services/notification_service.dart';
+// import '../services/notification_service.dart';
 import 'settings.dart';
 
 enum TimerState { initial, running, paused, finished }
@@ -47,7 +47,7 @@ class TimerHistory {
 
 class TimerModel extends ChangeNotifier {
   final Settings _settings;
-  final NotificationService _notificationService = NotificationService();
+  // final NotificationService _notificationService = NotificationService();
 
   Timer? _timer;
   TimerState _state = TimerState.initial;
@@ -231,9 +231,9 @@ class TimerModel extends ChangeNotifier {
 
     if (settings.notificationsEnabled) {
       final nextBreakType = _currentSession >= 4 ? "长休息" : "短休息";
-      _notificationService.showWorkSessionCompleted(
-        "工作阶段完成，现在开始$nextBreakType！",
-      );
+      // _notificationService.showWorkSessionCompleted(
+      //   "工作阶段完成，现在开始$nextBreakType！",
+      // );
     }
 
     if (addToHistory) {
@@ -271,7 +271,7 @@ class TimerModel extends ChangeNotifier {
       final message = _currentType == TimerType.longBreak
           ? "长休息结束，开始新的工作阶段！"
           : "短休息结束，开始新的工作阶段！";
-      _notificationService.showBreakCompleted(message);
+      // _notificationService.showBreakCompleted(message);
     }
 
     if (addToHistory) {
