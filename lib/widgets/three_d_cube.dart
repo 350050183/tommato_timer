@@ -71,6 +71,7 @@ class _ThreeDCubeState extends State<ThreeDCube> {
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(Colors.transparent)
         ..enableZoom(false)
+        ..setUserAgent('Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36')
         ..addJavaScriptChannel(
           'Flutter',
           onMessageReceived: (JavaScriptMessage message) {
@@ -205,13 +206,19 @@ class _ThreeDCubeState extends State<ThreeDCube> {
               camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
               
               renderer = new THREE.WebGLRenderer({ 
-                antialias: true, 
+                antialias: false, // 关闭抗锯齿以减少GPU负载
                 alpha: true,
-                preserveDrawingBuffer: true
+                preserveDrawingBuffer: false, // 关闭缓冲区保留以减少内存使用
+                powerPreference: "low-power", // 使用低功耗模式
+                failIfMajorPerformanceCaveat: true // 如果性能不足则失败
               });
               renderer.setSize(container.clientWidth, container.clientHeight);
               renderer.setClearColor(0x000000, 0);
               renderer.domElement.style.touchAction = 'none';
+              
+              // 设置像素比以优化性能
+              renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+              
               container.appendChild(renderer.domElement);
               
               // 添加触摸事件监听器
@@ -329,10 +336,31 @@ class _ThreeDCubeState extends State<ThreeDCube> {
             renderer.setSize(container.clientWidth, container.clientHeight);
           }
           
+          let animationId;
           function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
+            animationId = requestAnimationFrame(animate);
+            try {
+              if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+              }
+            } catch (error) {
+              console.error('渲染错误:', error);
+              // 停止动画循环以防止错误累积
+              if (animationId) {
+                cancelAnimationFrame(animationId);
+              }
+            }
           }
+          
+          // 页面卸载时清理资源
+          window.addEventListener('beforeunload', function() {
+            if (animationId) {
+              cancelAnimationFrame(animationId);
+            }
+            if (renderer) {
+              renderer.dispose();
+            }
+          });
           
           function detectCurrentFace() {
             if (!cube) return;
@@ -435,26 +463,50 @@ class _ThreeDCubeState extends State<ThreeDCube> {
     }
   }
 
+  Widget _buildFallbackUI() {
+    // 降级方案：简单的时间选择按钮
+    final durations = [5, 10, 15, 20, 25, 30];
+    return SizedBox(
+      height: 400,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('选择计时时间', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: durations.map((duration) => 
+              ElevatedButton(
+                onPressed: () => widget.onDurationSelected?.call(duration),
+                child: Text('$duration 分钟'),
+              )
+            ).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      // Web 平台使用占位符
-      return const SizedBox(
-        height: 400,
-        child: Center(child: Text('3D 立方体在 Web 平台暂不可用')),
-      );
+      // Web 平台使用降级方案
+      return _buildFallbackUI();
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-          ],
-        ),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red, size: 48),
+          const SizedBox(height: 16),
+          Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+          const SizedBox(height: 16),
+          const Text('使用简化界面:', style: TextStyle(fontSize: 16)),
+          const SizedBox(height: 10),
+          _buildFallbackUI(),
+        ],
       );
     }
 
