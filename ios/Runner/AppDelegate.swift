@@ -1,6 +1,6 @@
 import Flutter
 import UIKit
-import workmanager
+
 import AVFoundation
 
 @main
@@ -23,13 +23,9 @@ import AVFoundation
       print("Failed to set audio session category: \(error)")
     }
     
-    // 初始化 Workmanager
-    WorkmanagerPlugin.setPluginRegistrantCallback { registry in
-      GeneratedPluginRegistrant.register(with: registry)
-    }
+
     
-    // 注册后台任务
-    WorkmanagerPlugin.registerTask(withIdentifier: "tickTimer")
+
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

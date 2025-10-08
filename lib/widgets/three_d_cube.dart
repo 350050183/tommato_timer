@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+
 
 class ThreeDCube extends StatefulWidget {
   final Function(int)? onDurationSelected;
@@ -20,7 +23,7 @@ class ThreeDCube extends StatefulWidget {
   State<ThreeDCube> createState() => _ThreeDCubeState();
 }
 
-class _ThreeDCubeState extends State<ThreeDCube> {
+class _ThreeDCubeState extends State<ThreeDCube> with WidgetsBindingObserver {
   WebViewController? _controller;
   bool _isWebViewLoaded = false;
   String? _objContent;
@@ -30,6 +33,8 @@ class _ThreeDCubeState extends State<ThreeDCube> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // macOS 不支持透明背景的 WebView，直接跳过初始化以避免异常
     if (!kIsWeb) {
       _loadModelFiles();
     }
@@ -67,40 +72,79 @@ class _ThreeDCubeState extends State<ThreeDCube> {
       final String htmlContent = await _loadHtmlTemplate();
       // debugPrint('HTML模板加载成功');
 
-      final controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(Colors.transparent)
-        ..enableZoom(false)
-        ..setUserAgent('Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36')
-        ..addJavaScriptChannel(
-          'Flutter',
-          onMessageReceived: (JavaScriptMessage message) {
-            try {
-              // debugPrint('收到JavaScript消息: ${message.message}');
-              _onMessageReceived(message.message);
-            } catch (e) {
-              // debugPrint('处理JavaScript消息失败: $e');
-            }
-          },
-        )
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onPageFinished: (String url) {
-              // debugPrint('页面加载完成: $url');
-              setState(() {
-                _isWebViewLoaded = true;
-              });
-              _initializeThreeJS();
+
+
+      final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+      late final WebViewController controller;
+      if (isMacOS) {
+        final params = WebKitWebViewControllerCreationParams(
+          allowsInlineMediaPlayback: true,
+        );
+        controller = WebViewController.fromPlatformCreationParams(params)
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..enableZoom(false)
+          ..setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36')
+          ..addJavaScriptChannel(
+            'Flutter',
+            onMessageReceived: (JavaScriptMessage message) {
+              try {
+                _onMessageReceived(message.message);
+              } catch (e) {}
             },
-            onWebResourceError: (WebResourceError error) {
-              // debugPrint('Web资源错误: ${error.description}');
-              setState(() {
-                _errorMessage = 'Web资源错误: ${error.description}';
-              });
+          )
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageFinished: (String url) {
+                setState(() {
+                  _isWebViewLoaded = true;
+                });
+                _initializeThreeJS();
+              },
+              onWebResourceError: (WebResourceError error) {
+                setState(() {
+                  _errorMessage = 'Web资源错误: ${error.description}';
+                });
+              },
+            ),
+          )
+          ..loadHtmlString(htmlContent);
+      } else {
+        controller = WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..enableZoom(false)
+          ..setUserAgent('Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36')
+          ..addJavaScriptChannel(
+            'Flutter',
+            onMessageReceived: (JavaScriptMessage message) {
+              try {
+                _onMessageReceived(message.message);
+              } catch (e) {}
             },
-          ),
-        )
-        ..loadHtmlString(htmlContent);
+          )
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageFinished: (String url) {
+                setState(() {
+                  _isWebViewLoaded = true;
+                });
+                _initializeThreeJS();
+              },
+              onWebResourceError: (WebResourceError error) {
+                setState(() {
+                  _errorMessage = 'Web资源错误: ${error.description}';
+                });
+              },
+            ),
+          )
+          ..loadHtmlString(htmlContent);
+      }
+
+      // 仅在 Android/iOS 设置透明背景；macOS 不支持该调用，避免 UnimplementedError
+      try {
+        if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
+          controller.setBackgroundColor(Colors.transparent);
+        }
+      } catch (_) {}
 
       setState(() {
         _controller = controller;
@@ -115,6 +159,253 @@ class _ThreeDCubeState extends State<ThreeDCube> {
   }
 
   Future<String> _loadHtmlTemplate() async {
+    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+    // 强制 macOS 与 iOS 使用相同的 Three.js 模板，避免 WKWebView 下本地 WebGL 白屏
+    if (false && isMacOS) {
+      final String templateMac = '''
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>3D Cube Timer (WebGL)</title>
+        <style>
+          html, body { margin:0; padding:0; height:100%; background:#fff; overflow:hidden; }
+          canvas { display:block; width:100%; height:100%; }
+          #loading { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; }
+        </style>
+      </head>
+      <body>
+        <canvas id="glcanvas"></canvas>
+        <div id="loading">Loading...</div>
+        <script>
+          const canvas = document.getElementById('glcanvas');
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          // 初始化深度与裁剪设置，避免白屏
+          gl.clearDepth(1.0);
+          gl.enable(gl.DEPTH_TEST);
+          gl.depthFunc(gl.LEQUAL);
+          gl.disable(gl.CULL_FACE);
+          let animationId = null;
+          let isDragging = false;
+          let prev = {x:0,y:0};
+          let rotX = 0.3, rotY = -1.2, rotZ = 0.5;
+
+          function resize() {
+            // 使用 DPR 与边界尺寸，异常时回退 300x300，并输出尺寸日志
+            const rect = canvas.getBoundingClientRect();
+            const dpr = Math.max(1, (window.devicePixelRatio || 1));
+            let w = Math.floor((rect.width || window.innerWidth || document.documentElement.clientWidth || 300) * dpr);
+            let h = Math.floor((rect.height || window.innerHeight || document.documentElement.clientHeight || 300) * dpr);
+            if (!w || !h || !isFinite(w) || !isFinite(h)) { w = 300; h = 300; }
+            canvas.width = w;
+            canvas.height = h;
+            gl.viewport(0, 0, w, h);
+            console.log('WKWebView canvas size(px):', w, h, 'dpr:', dpr);
+          }
+          window.addEventListener('resize', resize);
+
+          const vsrc = `
+            attribute vec3 aPos;
+            attribute vec3 aCol;
+            varying vec3 vCol;
+            uniform mat4 uMVP;
+            void main() {
+              vCol = aCol;
+              gl_Position = uMVP * vec4(aPos,1.0);
+            }
+          `;
+          const fsrc = `
+            precision mediump float;
+            varying vec3 vCol;
+            void main() {
+              gl_FragColor = vec4(vCol,1.0);
+            }
+          `;
+          function shader(type,src){
+            const s = gl.createShader(type);
+            gl.shaderSource(s,src);
+            gl.compileShader(s);
+            if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+              console.log('shader compile error:', gl.getShaderInfoLog(s));
+              return null;
+            }
+            return s;
+          }
+          const prog = gl.createProgram();
+          const vs = shader(gl.VERTEX_SHADER, vsrc);
+          const fs = shader(gl.FRAGMENT_SHADER, fsrc);
+          if(!vs || !fs){
+            console.log('shader compile failed, abort');
+          } else {
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.linkProgram(prog);
+            if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+              console.log('program link error:', gl.getProgramInfoLog(prog));
+            } else {
+              gl.useProgram(prog);
+            }
+          }
+
+          // 立方体几何（面颜色区分）
+          const positions = new Float32Array([
+            // +X (25min) 右面
+            1,-1,-1,  1, 1,-1,  1, 1, 1,
+            1,-1,-1,  1, 1, 1,  1,-1, 1,
+
+            // -X (10min) 左面
+            -1,-1,-1,  -1,-1, 1,  -1, 1, 1,
+            -1,-1,-1,  -1, 1, 1,  -1, 1,-1,
+
+            // +Y (5min) 上面
+            -1, 1,-1,   1, 1,-1,   1, 1, 1,
+            -1, 1,-1,   1, 1, 1,  -1, 1, 1,
+
+            // -Y (30min) 下面
+            -1,-1,-1,  -1,-1, 1,   1,-1, 1,
+            -1,-1,-1,   1,-1, 1,   1,-1,-1,
+
+            // +Z (20min) 前面
+            -1,-1, 1,   1,-1, 1,   1, 1, 1,
+            -1,-1, 1,   1, 1, 1,  -1, 1, 1,
+
+            // -Z (15min) 后面
+            -1,-1,-1,  -1, 1,-1,   1, 1,-1,
+            -1,-1,-1,   1, 1,-1,   1,-1,-1
+          ]);
+          function faceColor(r,g,b){ return [r,g,b,r,g,b,r,g,b, r,g,b,r,g,b,r,g,b]; }
+          const colors = new Float32Array([
+            ...faceColor(1,0,0), // +X 25
+            ...faceColor(0.8,0.2,0.2), // -X 10
+            ...faceColor(0,1,0), // +Y 5
+            ...faceColor(0.2,0.8,0.2), // -Y 30
+            ...faceColor(0,0,1), // +Z 20
+            ...faceColor(0.2,0.2,0.8), // -Z 15
+          ]);
+
+          const posBuf = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);
+          gl.bufferData(gl.ARRAY_BUFFER,positions,gl.STATIC_DRAW);
+          const colBuf = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER,colBuf);
+          gl.bufferData(gl.ARRAY_BUFFER,colors,gl.STATIC_DRAW);
+
+          const aPos = gl.getAttribLocation(prog,'aPos');
+          const aCol = gl.getAttribLocation(prog,'aCol');
+          gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);
+          gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,0,0);
+          gl.enableVertexAttribArray(aPos);
+          gl.bindBuffer(gl.ARRAY_BUFFER,colBuf);
+          gl.vertexAttribPointer(aCol,3,gl.FLOAT,false,0,0);
+          gl.enableVertexAttribArray(aCol);
+
+          const uMVP = gl.getUniformLocation(prog,'uMVP');
+          function matMul(a,b){
+            const r = new Float32Array(16);
+            for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[i*4+k]*b[k*4+j];r[i*4+j]=s;}
+            return r;
+          }
+          function rotXMat(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0, 0,c,-s,0, 0,s,c,0, 0,0,0,1]);}
+          function rotYMat(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,s,0, 0,1,0,0, -s,0,c,0, 0,0,0,1]);}
+          function rotZMat(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,-s,0,0, s,c,0,0, 0,0,1,0, 0,0,0,1]);}
+          function translate(z){return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,z,1]);}
+          function perspective(fov,aspect,near,far){
+            const f=1/Math.tan(fov/2),nf=1/(near-far);
+            return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,(2*far*near)*nf,0]);
+          }
+
+          function detectFace(){
+            // 根据旋转后的法向量判断朝向相机的面
+            const nx = Math.cos(rotY)*Math.cos(rotZ); // 粗略估计
+            // 更稳定：比较 rotX/rotY 的范围
+            const ax = Math.abs(rotX % (2*Math.PI));
+            const ay = Math.abs(rotY % (2*Math.PI));
+            // 近似判断，选离摄像机最近的面
+            let duration = 25;
+            let best = -Infinity;
+            const candidates = [
+              {dur:25, normal:[1,0,0]},
+              {dur:10, normal:[-1,0,0]},
+              {dur:5, normal:[0,1,0]},
+              {dur:30, normal:[0,-1,0]},
+              {dur:20, normal:[0,0,1]},
+              {dur:15, normal:[0,0,-1]},
+            ];
+            function applyRot(v){
+              // 仅使用 rotX/rotY/rotZ 简化旋转
+              let x=v[0],y=v[1],z=v[2];
+              // Y
+              let cx=Math.cos(rotY),sx=Math.sin(rotY);
+              let x1=cx*x+sx*z, y1=y, z1=-sx*x+cx*z;
+              // X
+              let cy=Math.cos(rotX),sy=Math.sin(rotX);
+              let x2=x1, y2=cy*y1 - sy*z1, z2=sy*y1 + cy*z1;
+              // Z
+              let cz=Math.cos(rotZ),sz=Math.sin(rotZ);
+              return [cz*x2 - sz*y2, sz*x2 + cz*y2, z2];
+            }
+            const camDir=[0,0,-1];
+            for(const f of candidates){
+              const wn=applyRot(f.normal);
+              const dot=wn[0]*camDir[0]+wn[1]*camDir[1]+wn[2]*camDir[2];
+              if(dot>best){ best=dot; duration=f.dur; }
+            }
+            if (best > 0.5 && window.Flutter) {
+              window.Flutter.postMessage(JSON.stringify({type:'faceSelected', duration}));
+            }
+          }
+
+          function draw(time){
+            animationId = requestAnimationFrame(draw);
+            const dw = gl.drawingBufferWidth || canvas.width || 300;
+            const dh = gl.drawingBufferHeight || canvas.height || 300;
+            const aspect = (dh > 0 ? (dw / dh) : 1);
+            const proj = perspective(1.0, aspect, 0.1, 100.0);
+            const view = translate(-5.0);
+            const model = matMul(rotZMat(rotZ), matMul(rotYMat(rotY), rotXMat(rotX)));
+            const mvp = matMul(proj, matMul(view, model));
+            gl.uniformMatrix4fv(uMVP,false,mvp);
+            gl.clearColor(1,1,1,1);
+            gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+            gl.enable(gl.DEPTH_TEST);
+            gl.drawArrays(gl.TRIANGLES,0,positions.length/3);
+          }
+
+          function start(){ resize(); document.getElementById('loading').style.display='none'; draw(); }
+          // 鼠标交互
+          canvas.addEventListener('mousedown',e=>{isDragging=true; prev={x:e.clientX,y:e.clientY}; e.preventDefault();});
+          canvas.addEventListener('mousemove',e=>{
+            if(!isDragging) return;
+            const dx=e.clientX-prev.x, dy=e.clientY-prev.y;
+            rotY += dx*0.01; rotX += dy*0.01;
+            prev={x:e.clientX,y:e.clientY};
+            detectFace(); e.preventDefault();
+          });
+          canvas.addEventListener('mouseup',()=>{isDragging=false;});
+          // 触摸
+          canvas.addEventListener('touchstart',e=>{
+            if(e.touches.length===1){isDragging=true; prev={x:e.touches[0].clientX,y:e.touches[0].clientY}; e.preventDefault();}
+          },{passive:false});
+          canvas.addEventListener('touchmove',e=>{
+            if(!isDragging||e.touches.length!==1) return;
+            const dx=e.touches[0].clientX-prev.x, dy=e.touches[0].clientY-prev.y;
+            rotY += dx*0.01; rotX += dy*0.01;
+            prev={x:e.touches[0].clientX,y:e.touches[0].clientY};
+            detectFace(); e.preventDefault();
+          },{passive:false});
+          canvas.addEventListener('touchend',()=>{isDragging=false;}, {passive:false});
+
+          // 清理
+          window.addEventListener('beforeunload',()=>{ if(animationId) cancelAnimationFrame(animationId); });
+
+          start();
+        </script>
+      </body>
+      </html>
+      ''';
+      return templateMac;
+    }
+    // 非 macOS 继续使用现有 Three.js 模板
     final String template = '''
       <!DOCTYPE html>
       <html>
@@ -129,7 +420,7 @@ class _ThreeDCubeState extends State<ThreeDCube> {
             margin: 0; 
             padding: 0; 
             overflow: hidden; 
-            background-color: transparent; 
+            background-color: ${isMacOS ? '#000000' : 'transparent'}; 
             touch-action: none;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -206,18 +497,18 @@ class _ThreeDCubeState extends State<ThreeDCube> {
               camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
               
               renderer = new THREE.WebGLRenderer({ 
-                antialias: false, // 关闭抗锯齿以减少GPU负载
-                alpha: true,
-                preserveDrawingBuffer: false, // 关闭缓冲区保留以减少内存使用
-                powerPreference: "low-power", // 使用低功耗模式
-                failIfMajorPerformanceCaveat: true // 如果性能不足则失败
+                antialias: false,
+                alpha: false, // 桌面使用不透明白底
+                preserveDrawingBuffer: false,
+                powerPreference: "low-power",
+                failIfMajorPerformanceCaveat: false
               });
-              renderer.setSize(container.clientWidth, container.clientHeight);
-              renderer.setClearColor(0x000000, 0);
+              renderer.setSize(window.innerWidth, window.innerHeight);
+              renderer.setClearColor(0xffffff, 1);
               renderer.domElement.style.touchAction = 'none';
               
-              // 设置像素比以优化性能
-              renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+              // 设置像素比以优化性能（在移动端固定为1以降低GPU/缓冲压力）
+              renderer.setPixelRatio(1);
               
               container.appendChild(renderer.domElement);
               
@@ -272,6 +563,39 @@ class _ThreeDCubeState extends State<ThreeDCube> {
               container.addEventListener('touchmove', touchHandler.handleMove, { passive: false });
               container.addEventListener('touchend', touchHandler.handleEnd, { passive: false });
               container.addEventListener('touchcancel', touchHandler.handleEnd, { passive: false });
+              
+              // 桌面端鼠标事件（macOS）
+              const mouseHandler = {
+                handleDown: function(event) {
+                  isDragging = true;
+                  previousMousePosition = { x: event.clientX, y: event.clientY };
+                  event.preventDefault();
+                  event.stopPropagation();
+                },
+                handleMove: function(event) {
+                  if (!isDragging) return;
+                  const deltaMove = {
+                    x: event.clientX - previousMousePosition.x,
+                    y: event.clientY - previousMousePosition.y
+                  };
+                  if (cube) {
+                    cube.rotation.y += deltaMove.x * 0.01;
+                    cube.rotation.x += deltaMove.y * 0.01;
+                  }
+                  previousMousePosition = { x: event.clientX, y: event.clientY };
+                  detectCurrentFace();
+                  event.preventDefault();
+                  event.stopPropagation();
+                },
+                handleUp: function(event) {
+                  isDragging = false;
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              };
+              container.addEventListener('mousedown', mouseHandler.handleDown, { passive: false });
+              container.addEventListener('mousemove', mouseHandler.handleMove, { passive: false });
+              container.addEventListener('mouseup', mouseHandler.handleUp, { passive: false });
               
               console.log('开始加载模型文件...');
               const mtlLoader = new THREE.MTLLoader();
@@ -331,17 +655,25 @@ class _ThreeDCubeState extends State<ThreeDCube> {
           }
           
           function onWindowResize() {
-            camera.aspect = container.clientWidth / container.clientHeight;
+            const w = window.innerWidth || document.documentElement.clientWidth || container.clientWidth || 300;
+            const h = window.innerHeight || document.documentElement.clientHeight || container.clientHeight || 300;
+            camera.aspect = w / Math.max(1, h);
             camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(w, h);
           }
           
           let animationId;
-          function animate() {
+          let lastFrameTime = 0;
+          const targetFPS = 15; // 降低帧率以减少缓冲压力
+          const frameDuration = 1000 / targetFPS;
+          function animate(time) {
             animationId = requestAnimationFrame(animate);
             try {
-              if (renderer && scene && camera) {
-                renderer.render(scene, camera);
+              if (!lastFrameTime || (time - lastFrameTime) >= frameDuration) {
+                lastFrameTime = time;
+                if (renderer && scene && camera) {
+                  renderer.render(scene, camera);
+                }
               }
             } catch (error) {
               console.error('渲染错误:', error);
@@ -433,12 +765,20 @@ class _ThreeDCubeState extends State<ThreeDCube> {
   void _initializeThreeJS() {
     if (_isWebViewLoaded && _controller != null) {
       if (!kIsWeb) {
-        _controller!.runJavaScript('''
-          if (!window.isInitialized) {
-            init();
-            window.isInitialized = true;
-          }
-        ''');
+        final js = '''
+          (function(){
+            try{
+              if (!window.isInitialized) {
+                if (typeof start === 'function') { start(); }
+                else if (typeof init === 'function') { init(); }
+                window.isInitialized = true;
+              }
+            }catch(e){
+              console.log('init error:', (e && e.message) ? e.message : e);
+            }
+          })();
+        ''';
+        _controller!.runJavaScript(js);
       }
     }
   }
@@ -464,26 +804,30 @@ class _ThreeDCubeState extends State<ThreeDCube> {
   }
 
   Widget _buildFallbackUI() {
-    // 降级方案：简单的时间选择按钮
+    // 降级方案：简单的时间选择按钮（自适应父布局高度，避免溢出）
     final durations = [5, 10, 15, 20, 25, 30];
-    return SizedBox(
-      height: 400,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('选择计时时间', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: durations.map((duration) => 
-              ElevatedButton(
-                onPressed: () => widget.onDurationSelected?.call(duration),
-                child: Text('$duration 分钟'),
-              )
-            ).toList(),
-          ),
-        ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('选择计时时间', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: durations
+                  .map(
+                    (duration) => ElevatedButton(
+                      onPressed: () => widget.onDurationSelected?.call(duration),
+                      child: Text('$duration 分钟'),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -495,18 +839,22 @@ class _ThreeDCubeState extends State<ThreeDCube> {
       return _buildFallbackUI();
     }
 
+
     if (_errorMessage != null) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 48),
-          const SizedBox(height: 16),
-          Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-          const SizedBox(height: 16),
-          const Text('使用简化界面:', style: TextStyle(fontSize: 16)),
-          const SizedBox(height: 10),
-          _buildFallbackUI(),
-        ],
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 12),
+            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 12),
+            const Text('使用简化界面:', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            _buildFallbackUI(),
+          ],
+        ),
       );
     }
 
@@ -515,13 +863,36 @@ class _ThreeDCubeState extends State<ThreeDCube> {
     }
 
     return SizedBox(
-      height: 400,
-      child: WebViewWidget(controller: _controller!),
+      height: 300,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          color: Colors.white,
+          child: WebViewWidget(controller: _controller!),
+        ),
+      ),
     );
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    try {
+      if (_controller == null) return;
+      if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+        _controller!.runJavaScript('if (window.animationId){ cancelAnimationFrame(window.animationId); window.animationId = null; }');
+      } else if (state == AppLifecycleState.resumed) {
+        _controller!.runJavaScript('if (!window.animationId && typeof animate==="function"){ window.animationId = requestAnimationFrame(animate); }');
+      }
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // 在销毁前通知 WebView 取消动画帧，避免后台持续渲染占用缓冲
+    try {
+      _controller?.runJavaScript('if (window.animationId){ cancelAnimationFrame(window.animationId); }');
+    } catch (_) {}
     super.dispose();
   }
 }

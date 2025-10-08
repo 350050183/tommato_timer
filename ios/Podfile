@@ -34,11 +34,7 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # 明确排除 device_info_plus 插件
-  pod 'device_info_plus', :path => '.symlinks/plugins/device_info_plus/ios', :inhibit_warnings => true do |device_info|
-    device_info.exclude_files = '**/*'
-    device_info.source_files = ''
-  end
+
 
   # 明确排除 package_info_plus 插件
   # pod 'package_info_plus', :path => '.symlinks/plugins/package_info_plus/ios', :inhibit_warnings => true do |package_info|
@@ -56,8 +52,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     
-    # 跳过 device_info_plus 和 package_info_plus 目标
-    next if ['device_info_plus', 'package_info_plus'].include?(target.name)
+
     
     target.build_configurations.each do |config|
       # 为常规目标添加通用隐私清单

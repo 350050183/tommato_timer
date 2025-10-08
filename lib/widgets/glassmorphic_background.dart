@@ -19,6 +19,7 @@ class GlassmorphicBackground extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
+      constraints: const BoxConstraints.expand(),
       decoration: BoxDecoration(
         gradient: useGradient
             ? LinearGradient(
@@ -49,6 +50,7 @@ class GlassmorphicBackground extends StatelessWidget {
             : (isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5)),
       ),
       child: Stack(
+        fit: StackFit.expand,
         children: [
           // 渐变装饰元素
           Positioned(
